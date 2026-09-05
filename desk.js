@@ -16,7 +16,7 @@ function deskOverview(){
  const number=x=>Number.isFinite(x)?x.toLocaleString('en-US',{maximumFractionDigits:0}):'—';
  const rows=[['market','S&P 500',number(S.spx?.cur)],['bitcoin','BITCOIN',S.btc?'$'+number(S.btc.usd):'—'],['bank','SOFR',S.rates.sofr||'—'],['bond','US 10-YEAR',S.rates.t10||'—'],['flight','FLIGHTS',flightsFresh()?String(S.flights.length):'—']];
  const hasData=rows.some(r=>r[2]!=='—');
- return `<div class="desk-overview"><section class="desk-editorial"><div class="desk-photo"><img src="desk-harbor.webp" alt="Illustrative coastal harbor at blue hour" width="1920" height="768" fetchpriority="high" decoding="async"><small>ILLUSTRATIVE VIEW</small></div><h1>SITUATION<br>OVERVIEW</h1><p>MARKETS <span>·</span> WEATHER <span>·</span> WORLD</p></section><section class="desk-watch"><h2>WATCH DESK</h2><dl>${rows.map(([i,k,v])=>`<div><dt>${deskIcon(i)}${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl><p>${hasData?'Latest available readings · source timing varies':'Awaiting source updates'}</p></section></div>`;
+ return `<div class="desk-overview"><section class="desk-editorial"><div class="desk-photo"><img src="desk-greenwich.webp" alt="Aerial photograph of Greenwich Avenue, Greenwich, Connecticut" width="1920" height="1280" fetchpriority="high" decoding="async"><small>GREENWICH, CT · <a href="image-credits.html" target="_blank" rel="noopener">PHOTO CREDIT</a></small></div><h1>SITUATION<br>OVERVIEW</h1><p>MARKETS <span>·</span> WEATHER <span>·</span> WORLD</p></section><section class="desk-watch"><h2>WATCH DESK</h2><dl>${rows.map(([i,k,v])=>`<div><dt>${deskIcon(i)}${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl><p>${hasData?'Latest available readings · source timing varies':'Awaiting source updates'}</p></section></div>`;
 }
 vestaboardHTML=function(q,plain=false){return `<section class="desk-quote"><span class="desk-quote-rule"></span><blockquote>${esc(q.q)}</blockquote><p>${plain?'':'— '}${esc(q.a)}</p></section>`;};
 animateVestaboard=function(){stopVestaboard();};
@@ -79,7 +79,7 @@ showSpot=function(){
  const index=spotIdx,s=spots[index],body=$('spotBody');deskState.current=s.k;deskState.generation++;
  body.classList.remove('spotOut','fadein');body.dataset.shown='1';
  $('spotKicker').style.setProperty('--acc',s.acc||'var(--amber)');decodeKicker(s.k);
- $('pageBg').className='';$('spotSub').textContent=s.sub||'';$('spot').dataset.screen=s.k==='SITUATION OVERVIEW'?'overview':'detail';
+ $('pageBg').className='';$('spotSub').textContent=s.sub||'';$('spot').dataset.theme=/MARKET|RATE|FED|BANK|BITCOIN|RIA|M&A/.test(s.k)?'markets':/WEATHER|RADAR|TIDE|BUOY|LAKE|7-DAY/.test(s.k)?'weather':/ART|QUOTE|HISTORY|WORD/.test(s.k)?'culture':'world';$('spot').dataset.screen=s.k==='SITUATION OVERVIEW'?'overview':'detail';
  if(s.k==='SITUATION OVERVIEW')body.innerHTML=s.body;
  else {const stage=document.createElement('div');stage.id='deskStage';stage.style.transformOrigin='top left';if(s.html)stage.innerHTML=s.body;else stage.textContent=s.body.replace(/&amp;/g,'&');body.replaceChildren(stage);}
  $('deskPosition').innerHTML=`<b>${String(index+1).padStart(2,'0')}</b> / ${esc(s.k==='SITUATION OVERVIEW'?'OVERVIEW':s.k)}`;
@@ -106,7 +106,7 @@ const deskSolarOriginal=solarHTML;
 solarHTML=()=>deskSolarOriginal().replace(/animation-duration:/g,'--orbit-period:').replace(/animation-delay:/g,'--orbit-phase:');
 AMBIENT.find(scene=>scene.k==='SOLAR SYSTEM').b=solarHTML;
 const deskAmbientOriginal=showAmbient;
-showAmbient=function(){const shown=deskAmbientOriginal();if(shown){deskState.current=$('spotKickerTxt').textContent;$('deskPosition').textContent='NIGHT / '+deskState.current;$('spot').dataset.screen='detail';const scene=AMBIENT.find(s=>s.k===deskState.current);deskSchedule(scene?.dur||150000);$('deskPages').value='';deskMedia();if(deskState.paused||document.hidden)clearTimeout(spotTimer);}return shown;};
+showAmbient=function(){const shown=deskAmbientOriginal();if(shown){deskState.current=$('spotKickerTxt').textContent;$('deskPosition').textContent='NIGHT / '+deskState.current;$('spot').dataset.screen='detail';$('spot').dataset.theme='world';const scene=AMBIENT.find(s=>s.k===deskState.current);deskSchedule(scene?.dur||150000);$('deskPages').value='';deskMedia();if(deskState.paused||document.hidden)clearTimeout(spotTimer);}return shown;};
 // Update changed readings without replacing the image, table or animation state.
 setInterval(()=>{
  if(document.hidden||deskState.current!=='SITUATION OVERVIEW')return;

@@ -81,3 +81,34 @@ body.desk-paused #spotBody .desk-photo img,body.desk-paused #spotBody .amb-solar
  #spotKicker{font-size:2.3vh}.desk-quote{padding:2vh 1vw;max-width:94vw}.desk-quote blockquote{font-size:5vw}
 }
 @media(prefers-reduced-motion:reduce){#spotBody .desk-photo img,#spotBody .desk-value-change,.fadein,.ticker-inner.desk-scroll{animation:none!important}.ticker-inner{transform:none!important}}
+
+/* Shallow broadcast depth: static lighting, with no animated blur or filters. */
+#topbar{background:linear-gradient(115deg,#21323e 0%,#0b131c 45%,#172d38 100%);box-shadow:inset 0 1px #ffffff24,0 5px 20px #0008;z-index:3}
+#deskBrand,#clock{ text-shadow:0 1px 0 #81949e,0 2px 0 #324550,0 4px 7px #0009 }
+#deskBrand b{color:#ffc16d;text-shadow:0 1px #ae7739,0 2px #76512c,0 4px 8px #000a}
+#spot{--scene-rgb:83,160,178;background:#09131d}
+#spot[data-theme=markets]{--scene-rgb:201,147,70}
+#spot[data-theme=weather]{--scene-rgb:70,161,188}
+#spot[data-theme=world]{--scene-rgb:103,117,194}
+#spot[data-theme=culture]{--scene-rgb:154,104,146}
+#spot[data-screen=detail]::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;background:radial-gradient(ellipse at 92% 18%,rgba(var(--scene-rgb),.28),transparent 53%),radial-gradient(ellipse at 10% 100%,rgba(var(--scene-rgb),.10),transparent 62%),linear-gradient(125deg,#081018,#111e2a 54%,#080e15)}
+#spot[data-screen=detail]::after{content:"";position:absolute;right:-12vw;top:-24vw;width:58vw;height:58vw;border:1px solid rgba(var(--scene-rgb),.15);border-radius:50%;box-shadow:0 0 0 5vw rgba(var(--scene-rgb),.035),0 0 0 10vw rgba(var(--scene-rgb),.035),0 0 0 15vw rgba(var(--scene-rgb),.025);z-index:-1;pointer-events:none}
+#spot #spotKickerTxt{color:#edf4f7;text-shadow:0 1px 0 #70838f,0 2px 0 #344652,0 4px 7px #000b!important}
+#spot .desk-editorial h1{color:#f4f7fa;text-shadow:0 1px 0 #bdcbd3,0 2px 0 #8599a8,0 3px 0 #49606f,0 4px 0 #293e4d,0 8px 16px #000b!important}
+#spot .desk-editorial p{text-shadow:0 2px 4px #000!important}
+#spot .desk-watch{background:linear-gradient(110deg,#1b2c39,#0a131e 50%,#172d38);box-shadow:inset 0 1px #cbe6f52b,0 -8px 26px #0005!important;border-top:1px solid #7692a366}
+#spot .desk-watch dl>div{border-right-color:#98bfd329;box-shadow:1px 0 #0005!important}
+#spot .desk-watch dd{color:#edf5fa;text-shadow:0 1px #657c8d,0 2px #304a5a,0 4px 6px #000a!important}
+#spot #deskStage :is(h1,h2,h3,.fw-big,.cur,.kp-gauge){text-shadow:0 1px #617888,0 2px #223d4f,0 4px 8px #0008!important}
+#spot #deskStage img{border:1px solid #accad638;box-shadow:0 3px 0 #030a12,0 10px 24px #0008!important;background:#0a1520;border-radius:3px}
+#spot #deskStage :is(.ap-img,.art-img,.fl-photo){border:1px solid #8fabb54d;box-shadow:0 3px 0 #050b12,0 14px 30px #0008!important}
+#spot #deskStage :is(.box,.fw-mt,.aq-col){background:linear-gradient(140deg,#263b4d88,#0b1726aa);border:1px solid #accbdf29;box-shadow:inset 0 1px #ffffff12,0 6px 15px #0003!important}
+#spot .desk-quote{border-left:2px solid #d8ac73;background:linear-gradient(115deg,#2a344866,transparent);padding:3vh 3vw;box-shadow:inset 1px 0 #f2d5a92a!important}
+#spot .desk-quote blockquote{text-shadow:0 2px #283c4d,0 5px 12px #0008!important}
+.tickerbar{background:linear-gradient(180deg,#1d2b36,#0e1923 48%,#0a1119);box-shadow:inset 0 1px #bed8ea1c}
+.tag{background:linear-gradient(135deg,#ffd48d,#e7a64d 60%,#bf7934)!important;color:#171c22!important;text-shadow:0 1px #ffe3b588;box-shadow:inset 0 1px #fff7,3px 0 8px #0004}
+#newsbar .tag{background:linear-gradient(135deg,#b8e4e3,#80babf 60%,#548c9c)!important}
+#spot .desk-photo small{padding:6px 9px;background:#091521a8;border:1px solid #d0e4ee2b;box-shadow:0 3px 12px #0004!important}
+@media(max-width:760px){#spot .desk-editorial h1{text-shadow:0 1px #8da4b3,0 2px #405869,0 5px 9px #000b!important}#spot #deskStage img{box-shadow:0 2px 0 #030a12,0 6px 12px #0007!important}}
+
+#spot .desk-photo small a{color:inherit;text-decoration:underline;text-underline-offset:3px}#spot .desk-photo small a:focus-visible{outline:2px solid #ffc16d;outline-offset:3px}
