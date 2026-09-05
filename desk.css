@@ -29,3 +29,5 @@ body::after,#depth,#pageBg,#hud,.pg-wm,.intro,.intro-stage>.intro{display:none!i
 
 #spotBody .amb-solar .orb{animation:orbSpin var(--orbit-period,20s) linear infinite!important;animation-delay:var(--orbit-phase,0s)!important}
 @media(prefers-reduced-motion:reduce){#spotBody .amb-solar .orb{animation:none!important}}
+
+@media(max-width:760px) and (orientation:portrait){.desk-overview{flex:none}.desk-editorial,.desk-watch{flex-shrink:0}}
