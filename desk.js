@@ -201,3 +201,33 @@ fetchArt=async function(){
   S.art={...work,date:today,desc:String(work.desc||'').replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim()};
  }catch(e){await deskFetchArtOriginal();}
 };
+
+// Detailed instrument artwork, shared across the dashboard's renderers.
+let deskMoonId=0;
+moonSVG=function(frac,cls){
+ const r=46,p=((frac%1)+1)%1,wax=p<=.5,t=Math.cos(p*2*Math.PI),rx=Math.max(.001,Math.abs(t)*r),id='lunar-'+(++deskMoonId);
+ const d=`M50 4 A46 46 0 0 ${wax?1:0} 50 96 A${rx} 46 0 0 ${t>0?(wax?0:1):(wax?1:0)} 50 4Z`;
+ return `<svg class="${cls||''} desk-moon" viewBox="0 0 100 100" role="img" aria-label="Moon, approximately ${Math.round((1-t)*50)} percent illuminated"><defs><clipPath id="${id}-disc"><circle cx="50" cy="50" r="46"/></clipPath><clipPath id="${id}-lit"><path d="${d}"/></clipPath><radialGradient id="${id}-limb"><stop offset="68%" stop-color="#020913" stop-opacity="0"/><stop offset="100%" stop-color="#020913" stop-opacity=".5"/></radialGradient></defs><g clip-path="url(#${id}-disc)"><circle cx="50" cy="50" r="46" fill="#01050a"/><image href="desk-moon.webp" x="-5.5" y="-3.6" width="111" height="105.5" opacity=".13" preserveAspectRatio="none"/><g clip-path="url(#${id}-lit)"><image href="desk-moon.webp" x="-5.5" y="-3.6" width="111" height="105.5" preserveAspectRatio="none"/></g><circle cx="50" cy="50" r="46" fill="url(#${id}-limb)"/></g><circle cx="50" cy="50" r="46" fill="none" stroke="#bcd0e5" stroke-opacity=".2" stroke-width=".18"/></svg>`;
+};
+const deskMoonPageOriginal=moonPageHTML;
+moonPageHTML=function(){
+ const p=moonPhaseFrac();
+ const name=p<.015||p>.985?'New Moon':Math.abs(p-.25)<.015?'First Quarter':Math.abs(p-.5)<.015?'Full Moon':Math.abs(p-.75)<.015?'Last Quarter':p<.25?'Waxing Crescent':p<.5?'Waxing Gibbous':p<.75?'Waning Gibbous':'Waning Crescent';
+ const t=document.createElement('template');t.innerHTML=deskMoonPageOriginal();t.content.querySelector('.name').textContent=name;
+ [...t.content.querySelectorAll('.mn-strip>span')].forEach((el,i)=>el.classList.toggle('cur',i===MOON_NAMES.indexOf(name)));
+ t.content.querySelector('.mn-info').insertAdjacentHTML('beforeend','<div class="desk-lunar-note">LUNAR SURFACE · APPROXIMATE PHASE<br><a href="image-credits.html" target="_blank" rel="noopener">PHOTO: GREGORY H. REVERA</a></div>');
+ return t.innerHTML;
+};
+const deskClockOriginal=worldClockHTML;
+worldClockHTML=function(){
+ const marks=Array.from({length:60},(_,i)=>`<line x1="100" y1="${i%5?15:12}" x2="100" y2="${i%5?19:24}" transform="rotate(${i*6} 100 100)" stroke="${i%5?'#839ba9':'#e5edf0'}" stroke-width="${i%5?1:2.4}"/>`).join('');
+ const nums=[12,1,2,3,4,5,6,7,8,9,10,11].map((n,i)=>{const a=i*Math.PI/6;return `<text x="${100+64*Math.sin(a)}" y="${100-64*Math.cos(a)+5}" text-anchor="middle" fill="#dce9ef" font-family="Arial,sans-serif" font-size="14">${n}</text>`;}).join('');
+ return deskClockOriginal().replaceAll('<div class="face">',`<div class="face"><svg class="desk-dial" viewBox="0 0 200 200" aria-hidden="true"><circle cx="100" cy="100" r="96" fill="none" stroke="#bfdae5" stroke-opacity=".35"/><circle cx="100" cy="100" r="80" fill="none" stroke="#839ba9" stroke-opacity=".2"/>${marks}${nums}<text x="100" y="133" fill="#79919f" text-anchor="middle" font-size="6" letter-spacing="2">WORLD TIME</text></svg>`);
+};
+function deskTrainSVG(){
+ const id='rail-'+(++deskMoonId);
+ const windows=Array.from({length:8},(_,i)=>`<rect x="${194+i*43}" y="59" width="29" height="28" rx="3" fill="url(#${id}-glass)" stroke="#394b56" stroke-width="2"/><path d="M${198+i*43} 63h20" stroke="#9dc0cd" opacity=".45"/>`).join('');
+ return `<svg class="desk-train" viewBox="0 0 640 180" role="img" aria-label="Detailed red and silver electric commuter train illustration"><defs><linearGradient id="${id}-steel" x2="0" y2="1"><stop stop-color="#e3ebee"/><stop offset=".25" stop-color="#8497a3"/><stop offset=".5" stop-color="#d4dfe4"/><stop offset="1" stop-color="#5d7281"/></linearGradient><linearGradient id="${id}-glass" x2="0" y2="1"><stop stop-color="#6693a6"/><stop offset=".45" stop-color="#243e51"/><stop offset="1" stop-color="#101e2c"/></linearGradient></defs><g stroke-linejoin="round"><path d="M6 166h626M6 172h626" stroke="#8b9eac" stroke-width="2"/><g stroke="#445563" stroke-width="5">${Array.from({length:28},(_,i)=>`<path d="M${12+i*23} 164l-9 11"/>`).join('')}</g><path d="M63 131h540v17H63z" fill="#17222d"/><g fill="#111921" stroke="#6c8191" stroke-width="3">${[99,129,508,538].map(x=>`<circle cx="${x}" cy="147" r="14"/><circle cx="${x}" cy="147" r="5" fill="#899da9"/>`).join('')}</g><path d="M112 38h490q13 0 13 15v80H52V83q0-23 27-36z" fill="url(#${id}-steel)" stroke="#405868" stroke-width="2"/><path d="M72 53q15-15 40-15h47v95H52V83q0-19 20-30" fill="#a9303f"/><path d="M82 53h59v38H62V77q3-13 20-24" fill="url(#${id}-glass)" stroke="#293e49" stroke-width="4"/><path d="M104 53v38M73 81l23-19M116 82l18-20" stroke="#9caeb3" stroke-width="2"/><path d="M160 94h453v9H160" fill="#ba3541"/>${windows}<rect x="551" y="51" width="39" height="80" rx="3" fill="#879eac" stroke="#354b5a" stroke-width="2"/><path d="M570 51v80" stroke="#344a57"/><rect x="556" y="60" width="10" height="28" rx="2" fill="#1b3547"/><rect x="575" y="60" width="10" height="28" rx="2" fill="#1b3547"/><path d="M169 109h371m-371 6h371m-371 6h371" stroke="#5b7485" stroke-width="1"/><rect x="92" y="99" width="43" height="10" rx="2" fill="#161e25"/><text x="113" y="106" text-anchor="middle" fill="#f2c77b" font-family="monospace" font-size="6">NEW HAVEN</text><g fill="#fff0c9" stroke="#5d6164" stroke-width="2"><circle cx="63" cy="114" r="5"/><circle cx="140" cy="114" r="5"/></g><path d="M43 130h109v9H43" fill="#263440"/><rect x="31" y="135" width="29" height="8" rx="2" fill="#0c151e"/><path d="M185 38v-9h74v9M378 38v-8h63v8" fill="#607582" stroke="#8fa6b1"/><path d="M293 37l30-21-23-10h49l-22 10 30 21M286 6h70" fill="none" stroke="#9cabb4" stroke-width="3"/><path d="M176 44h425" stroke="#edf6fb" stroke-opacity=".6"/></g></svg>`;
+}
+const deskTrainsOriginal=trainsHTML;
+trainsHTML=function(){const t=document.createElement('template');t.innerHTML=deskTrainsOriginal();t.content.querySelector('.intro')?.remove();const track=t.content.querySelector('.tr-track');if(track){track.className='desk-rail-scene';track.innerHTML=deskTrainSVG()+'<span>NEW HAVEN LINE · ELECTRIC COMMUTER RAIL</span>';t.content.querySelector('.tr-wrap').prepend(track);}return t.innerHTML;};
