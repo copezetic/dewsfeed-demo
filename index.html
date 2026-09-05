@@ -1219,7 +1219,7 @@
   #alertStrip.show{display:flex}
   #alertStrip .puls{animation:pulse 1.1s infinite}
 </style>
-<link rel="stylesheet" href="desk.css?v=20260905-2">
+<link rel="stylesheet" href="desk.css?v=20260905-broadcast1">
 <link rel="preload" as="image" href="desk-harbor.webp">
 </head>
 <body>
@@ -3425,7 +3425,7 @@ function buildDataTicker(){
   if(flightsFresh())seg.push(`<b>FLT</b> <span class="cy">${S.flights.length} OVERHEAD</span> nearest ${esc(S.flights[0].cs)} ${S.flights[0].dist.toFixed(0)}mi`);
   if(S.tides)seg.push(`<b>TIDE</b> ${S.tides}`);
   if(S.lakeTemp)seg.push(`<b>LAKE</b> <span class="cy">${S.lakeTemp}°</span>`);
-  if(seg.length)$("dataInner").innerHTML=seg.join('<span class="sep">◆</span>');
+  if(seg.length)deskTicker($("dataInner"),seg.join('<span class="sep">◆</span>'));
 }
 function buildNewsTicker(){
   const seg=[
@@ -3434,9 +3434,9 @@ function buildNewsTicker(){
     ...S.locNews.slice(0,3).map(h=>({...h,loc:true})),
   ];
   if(!seg.length)return;
-  $("newsInner").innerHTML=seg.map(h=>
+  deskTicker($("newsInner"),seg.map(h=>
     `<b>${esc((h.bank?"BANKING":h.loc?"GREENWICH":(h.src||"NEWS")).toUpperCase())}:</b> ${esc(h.t)}`)
-    .join('<span class="sep">◆</span>');
+    .join('<span class="sep">◆</span>'));
 }
 
 /* ══════════════ FETCHERS ══════════════ */
@@ -3789,7 +3789,7 @@ async function fetchTasks(){
 }
 
 </script>
-<script src="desk.js?v=20260905-2"></script>
+<script src="desk.js?v=20260905-broadcast1"></script>
 <script>
 /* ══════════════ BOOT ══════════════ */
 (async function boot(){

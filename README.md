@@ -21,3 +21,16 @@ The office and public editions share `desk.css`, `desk.js`, and `desk-harbor.web
 Keep these three files identical. Retain the edition-specific `index.html` and
 never copy office credentials into this public repository. The Pi deployment
 script includes all three assets. A real Pi performance check remains necessary.
+
+## Full-screen broadcast mode
+
+The feed now fills the viewport with an edge-to-edge animated overview, a compact
+watch band, and two continuously scrolling ticker rails. Pages rotate every
+15–18 seconds. Move the pointer, tap, or press a key to reveal controls; they hide
+after inactivity. Use Fullscreen to enter browser fullscreen (requires a user
+gesture), and Escape or Exit Fullscreen to leave it.
+
+Pause freezes the ticker, image pan, and page-progress indicator. Resume continues
+the remaining page time. New ticker readings switch at a loop boundary to avoid
+jumps. Short ticker content repeats to fill the viewport. Reduced-motion system
+preferences suppress motion. Hidden tabs suspend rotation and animations.

@@ -31,3 +31,53 @@ body::after,#depth,#pageBg,#hud,.pg-wm,.intro,.intro-stage>.intro{display:none!i
 @media(prefers-reduced-motion:reduce){#spotBody .amb-solar .orb{animation:none!important}}
 
 @media(max-width:760px) and (orientation:portrait){.desk-overview{flex:none}.desk-editorial,.desk-watch{flex-shrink:0}}
+
+/* Full-screen broadcast: the display runs without permanent navigation chrome. */
+body{height:100dvh;overflow:hidden;cursor:none}
+body.desk-controls-visible,body:has(#deskNav:focus-within){cursor:auto}
+#topbar{height:7.5vh;min-height:46px;padding:.7vh 1.7vw;z-index:3;position:relative;background:#060a0d}
+#deskBrand{font-size:4.5vh;min-width:25%;white-space:nowrap}#deskBrand small,#dateline{display:none}
+#clock{font-size:4.5vh}.top-wx{flex-direction:row;gap:2vw;min-width:25%}.wx-slot .l,.wx-slot .v{font-size:1.75vh}.wx-slot .l{letter-spacing:.025em}
+#deskNav{position:fixed;z-index:100;left:1vw;right:1vw;top:8.5vh;height:48px;min-height:48px;background:#080e15f5;border:1px solid #34464f;opacity:0;pointer-events:none;transform:translateY(-8px);transition:opacity .24s,transform .24s}
+.desk-controls-visible #deskNav,#deskNav:focus-within{opacity:1;pointer-events:auto;transform:none}
+#deskNav button,#deskNav select{font-size:clamp(10px,1.45vh,17px);padding:0 .75vw}#deskTransport button{white-space:nowrap}
+#spot{padding:2.5vh 3vw 1.5vh;isolation:isolate}
+#spot[data-screen=overview]{padding:0}
+#spot[data-screen=overview] #spotKicker,#spot[data-screen=overview] #spotSub{display:none}
+#spotBody{overflow:hidden}.fadein{animation:deskBroadcastIn .65s cubic-bezier(.16,1,.3,1) both}
+@keyframes deskBroadcastIn{from{opacity:0;transform:translateX(20px)}to{opacity:1;transform:none}}
+.desk-overview{display:block;position:relative;flex:1;height:100%;min-height:0;width:100%;overflow:hidden}
+.desk-editorial{position:absolute;inset:0 0 12vh;padding:0;display:block;overflow:hidden}
+.desk-photo{position:absolute;inset:0;height:auto;min-height:0;background:#142530}
+#spotBody .desk-photo img{width:100%;height:100%;object-fit:cover;animation:deskHarborPan 32s ease-in-out infinite alternate!important;will-change:transform}
+@keyframes deskHarborPan{from{transform:scale(1.025) translateX(.4%)}to{transform:scale(1.105) translateX(-1.2%)}}
+.desk-photo::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,transparent 36%,rgba(2,8,13,.12) 55%,rgba(2,8,13,.82));pointer-events:none}
+.desk-photo small{top:2vh;right:2vw;bottom:auto;background:transparent;z-index:1;font-size:1.2vh;letter-spacing:.075em}
+.desk-editorial h1{position:absolute;left:3.4vw;bottom:8vh;margin:0;font:600 8.1vh/.96 var(--sans);letter-spacing:-.035em;color:#f4f7f8;z-index:2}
+.desk-editorial p{position:absolute;left:3.6vw;bottom:2.6vh;margin:0;font:500 2.05vh var(--sans);letter-spacing:.12em;color:#d9e1e8;z-index:2;white-space:nowrap}
+.desk-editorial p::before{content:"";position:absolute;left:0;top:-2.1vh;width:3.6vw;height:3px;background:var(--amber)}
+.desk-editorial p span{color:var(--amber);margin:0 .9vw}
+.desk-watch{position:absolute;inset:auto 0 0;height:12vh;min-height:0;display:block;padding:1.3vh 1.3vw;border:0;border-top:1px solid #3b4a54;background:#080e14}
+.desk-watch h2,.desk-watch p,.desk-watch dt svg{display:none}
+.desk-watch dl{display:grid;grid-template-columns:repeat(5,1fr);height:100%;margin:0}
+.desk-watch dl>div{display:flex;flex-direction:column;justify-content:center;gap:1vh;border:0;border-right:1px solid #33444e;padding:0 .4vw;min-height:0}
+.desk-watch dl>div:last-child{border:0}.desk-watch dt{font:500 1.9vh var(--sans);color:var(--cyan);white-space:nowrap;letter-spacing:.025em}.desk-watch dd{font:500 3.45vh var(--mono);margin:0;line-height:1;white-space:nowrap}
+#spotBody .desk-value-change{animation:deskValueFlash 1.2s ease-out!important}@keyframes deskValueFlash{from{color:var(--amber)}to{color:var(--ink)}}
+#deskStatus{height:4vh;min-height:24px;gap:1.5vw;background:#080c10;font-size:1.5vh;white-space:nowrap}
+#deskProgress{height:2px;flex:1;background:#26333b;overflow:hidden}#deskProgress i{display:block;background:var(--amber);width:100%;height:100%;transform:scaleX(0);transform-origin:left}
+.tickerbar{height:7.25vh!important;min-height:36px;padding:0;gap:0;border-color:#35434d!important}
+.tag{min-width:11.6vw;justify-content:center;font:600 3vh var(--sans)!important;padding:0 1vw;letter-spacing:-.015em}
+.ticker{padding:0;border:0}.ticker-inner{display:flex;flex:0 0 auto;width:max-content;font:500 2.65vh var(--mono)!important;line-height:1}
+#newsInner{font-family:var(--sans)!important;font-weight:400!important}.ticker-inner .desk-ticker-copy{display:flex;flex:none;align-items:center;padding:0;white-space:nowrap}.desk-ticker-unit{display:inline-block;padding:0 3.5vw;white-space:nowrap;flex:none}.ticker-inner .sep{margin:0 2.6vw;color:#84949d}.ticker-inner b{font-weight:500}.ticker-inner.desk-scroll{animation-timing-function:linear!important}
+body.desk-paused #spotBody .desk-photo img,body.desk-paused #spotBody .amb-solar .orb,body.desk-paused #spotBody .amb-aurora i,body.desk-paused .desk-scroll,body.desk-hidden #spotBody .desk-photo img,body.desk-hidden .desk-scroll{animation-play-state:paused!important}
+@media(max-width:900px){#deskNav{height:auto;min-height:44px;flex-wrap:wrap;padding:0 4px;gap:0}#deskNav button,#deskNav select{font-size:10px;min-height:34px;padding:0 8px}#deskNav select{max-width:150px}#deskTransport{margin-left:auto;width:auto;border-top:0;justify-content:flex-end}}
+@media(max-width:760px) and (orientation:portrait){
+ #topbar{height:7.5vh;min-height:46px;padding:0 12px}#deskBrand{font-size:clamp(18px,3.8vw,28px);min-width:0}#clock{font-size:clamp(20px,4vw,30px)}.top-wx{flex-direction:column;min-width:0;gap:4px}.wx-slot .l{font-size:9px}.wx-slot .v{font-size:11px}
+ #deskNav{top:8.5vh}#deskNav button,#deskNav select{font-size:9px;padding:0 7px}#deskTransport{width:100%;border-top:1px solid var(--edge)}
+ #spot{overflow:hidden;padding:2vh 3vw 1vh}#spot[data-screen=overview]{padding:0}.desk-overview{display:block;flex:1;height:100%}.desk-editorial{inset:0 0 14vh;flex:none}.desk-photo{position:absolute;inset:0;height:auto;min-height:0}
+ .desk-editorial h1{font-size:clamp(38px,10vw,68px);bottom:7vh;left:5vw;line-height:.98;margin:0}.desk-editorial p{font-size:clamp(10px,2.5vw,15px);bottom:2.8vh;left:5vw;letter-spacing:.08em}.desk-photo small{font-size:9px;top:12px;right:12px}
+ .desk-watch{height:14vh;padding:1vh 0;flex:none}.desk-watch dl{grid-template-columns:repeat(5,minmax(0,1fr))}.desk-watch dl>div{min-height:0;gap:1.4vh}.desk-watch dt{font-size:clamp(7px,1.9vw,12px);letter-spacing:0}.desk-watch dd{font-size:clamp(10px,2.7vw,17px)}
+ #deskStatus{height:4vh;min-height:24px;font-size:9px;padding:0 12px}#deskDiagnostics{display:none}.tickerbar{height:7.25vh!important;min-height:34px}.tag{font-size:clamp(13px,3vw,19px)!important;min-width:16vw}.ticker-inner{font-size:clamp(15px,3.7vw,23px)!important}.desk-ticker-unit{padding:0 5vw}
+ #spotKicker{font-size:2.3vh}.desk-quote{padding:2vh 1vw;max-width:94vw}.desk-quote blockquote{font-size:5vw}
+}
+@media(prefers-reduced-motion:reduce){#spotBody .desk-photo img,#spotBody .desk-value-change,.fadein,.ticker-inner.desk-scroll{animation:none!important}.ticker-inner{transform:none!important}}
