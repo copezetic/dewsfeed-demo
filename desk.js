@@ -80,9 +80,9 @@ function deskSuspend(){
 }
 function deskFit(){
  const frame=$('deskStage');if(!frame)return;
- frame.style.transform='none';frame.style.width='100%';
+ frame.style.transform='none';frame.style.width='100%';frame.style.height='100%';$('spotBody').style.setProperty('--desk-height',$('spotBody').clientHeight+'px');
  const box=$('spotBody');const scale=Math.min(1,box.clientHeight/Math.max(frame.scrollHeight,1),box.clientWidth/Math.max(frame.scrollWidth,1));
- if(scale<.99)frame.style.transform=`scale(${scale})`;
+ if(scale<.99){frame.style.transform=`scale(${scale})`;frame.style.width=`${100/scale}%`;}
 }
 showSpot=function(){
  clearTimeout(spotTimer);if(ambPending&&deskState.group==='all'&&!deskState.paused){ambPending=false;ambCycles=0;if(showAmbient())return;}buildSpots();if(!spots.length)return;
