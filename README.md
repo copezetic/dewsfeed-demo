@@ -1,15 +1,23 @@
-# The Dews Feed — Live Demo
+# The Dews Feed — Situation Desk
 
-A DIY ambient "ticker wall" dashboard that runs 24/7 on a Raspberry Pi at an
-office in Greenwich, CT — war-room design language, 20+ rotating pages, 3D
-scene backdrops, split-flap quote board, real-coastline nautical chart,
-night ambient scenes.
+The Dewplex preview of the office Raspberry Pi dashboard.
 
-**▶ Live demo:** https://copezetic.github.io/dewsfeed-demo
+[Open the dashboard](https://copezetic.github.io/dewsfeed-demo/).
 
-This is a sanitized public build: API-fed pages (news, scores, live markets)
-show loading placeholders because the real screen fetches through a local
-proxy on the Pi. Everything design-side runs live in your browser.
+The shared desk design uses a locally stored WebP harbor illustration, a watch desk,
+restrained transitions, and compositor-driven tickers. Select a topic or use All
+Pages to jump to a screen. Previous/Next and Pause/Resume also work with the left/
+right arrow keys and space bar when focus is outside a control.
 
-Try the deep links: `#testquote` (split-flap board), `#testclock` (world
-clock), `#testsolar`, `#testaurora`, `#testlis` (nautical chart).
+Public feeds can populate without the office proxy; office-only feeds remain
+unavailable here. No private configuration is included. Values are latest
+available source readings, not guaranteed real-time prices. The harbor is an
+AI-generated illustration, not a live camera or navigational image.
+
+Add `?diagnostics` to display sampled browser FPS, longest frame interval in each
+sample, and active bounded data requests. This measures the current device only.
+
+The office and public editions share `desk.css`, `desk.js`, and `desk-harbor.webp`.
+Keep these three files identical. Retain the edition-specific `index.html` and
+never copy office credentials into this public repository. The Pi deployment
+script includes all three assets. A real Pi performance check remains necessary.

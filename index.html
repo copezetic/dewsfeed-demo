@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-edition="public">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -1219,6 +1219,8 @@
   #alertStrip.show{display:flex}
   #alertStrip .puls{animation:pulse 1.1s infinite}
 </style>
+<link rel="stylesheet" href="desk.css?v=20260905">
+<link rel="preload" as="image" href="desk-harbor.webp">
 </head>
 <body>
 <!-- Ambient depth field: two parallax particle layers + volumetric orbs.
@@ -1277,7 +1279,7 @@
   <span id="musicName"></span>
 </div>
 
-<script src="secrets.js"></script>
+<!-- Public preview: private configuration is never bundled. -->
 <script>
 /* ════════════════════════════════════════════════════════════════════ */
 const CFG = {
@@ -3786,13 +3788,24 @@ async function fetchTasks(){
   }catch(e){}
 }
 
+</script>
+<script src="desk.js?v=20260905"></script>
+<script>
 /* ══════════════ BOOT ══════════════ */
 (async function boot(){
   try{
-    await fetch(CFG.proxy+"/ping",{signal:AbortSignal.timeout(1500)});
+    throw new Error("Public preview has no office proxy");
     PROXY_OK=true;$("proxyDot").className="ok";
   }catch(e){$("proxyDot").className="warn";}
-  const every=(fn,ms)=>{fn();setInterval(fn,ms)};
+  let startOffset=0;
+  const every=(fn,ms)=>{
+    const run=async()=>{
+      if(document.hidden){setTimeout(run,Math.min(ms,15000));return;}
+      try{await fn();}catch(e){/* Per-source failures retain last-good state. */}
+      setTimeout(run,ms);
+    };
+    setTimeout(run,startOffset);startOffset+=250;
+  };
   every(()=>fetchWx(CFG.office,"wx1V"),10*60*1000);
   every(()=>fetchWx(CFG.lake,"wx2V"),10*60*1000);
   every(fetchForecast,60*60*1000);
@@ -3823,7 +3836,7 @@ async function fetchTasks(){
   every(fetchFx,60*60*1000);       // ECB reference rates update once a day
   every(fetchAir,30*60*1000);      // AQI + UV tiles on the weather page
   every(fetchHoro,6*60*60*1000);   // daily horoscope — text changes once a day
-  setInterval(pollMusic,5000);     // DEWS FM switch — phone toggles, wall obeys
+  if(!DESK_PUBLIC)setInterval(()=>{if(!document.hidden)pollMusic();},5000);     // DEWS FM switch — phone toggles, wall obeys
   startAIS();                      // live vessels (no-op until aisKey is set)
   setInterval(()=>{   // ISS heads-up: high pass rising within 10 min, once each
     const p=S.issPasses[0]; if(!p)return;
@@ -3847,7 +3860,7 @@ async function fetchTasks(){
   },15000);
   every(fetchWhoop,30*60*1000);
   every(fetchAlerts,5*60*1000);
-  setTimeout(showSpot,1200);
+  showSpot();
 
   if(location.hash==="#testwarn")
     takeover("nws","SEVERE THUNDERSTORM WARNING",
