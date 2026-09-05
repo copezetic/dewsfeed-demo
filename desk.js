@@ -16,7 +16,7 @@ function deskOverview(){
  const number=x=>Number.isFinite(x)?x.toLocaleString('en-US',{maximumFractionDigits:0}):'—';
  const rows=[['market','S&P 500',number(S.spx?.cur)],['bitcoin','BITCOIN',S.btc?'$'+number(S.btc.usd):'—'],['bank','SOFR',S.rates.sofr||'—'],['bond','US 10-YEAR',S.rates.t10||'—'],['flight','FLIGHTS',flightsFresh()?String(S.flights.length):'—']];
  const hasData=rows.some(r=>r[2]!=='—');
- return `<div class="desk-overview"><section class="desk-editorial"><div class="desk-photo"><img src="desk-greenwich.webp" alt="Aerial photograph of Greenwich Avenue, Greenwich, Connecticut" width="1920" height="1280" fetchpriority="high" decoding="async"><small>GREENWICH, CT · <a href="image-credits.html" target="_blank" rel="noopener">PHOTO CREDIT</a></small></div><h1>SITUATION<br>OVERVIEW</h1><p>MARKETS <span>·</span> WEATHER <span>·</span> WORLD</p></section><section class="desk-watch"><h2>WATCH DESK</h2><dl>${rows.map(([i,k,v])=>`<div><dt>${deskIcon(i)}${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl><p>${hasData?'Latest available readings · source timing varies':'Awaiting source updates'}</p></section></div>`;
+ return `<div class="desk-overview"><section class="desk-editorial"><div class="desk-photo"><img src="desk-waterfront.webp" alt="Boats and reflections at Greenwich Harbor, Connecticut, photographed by Carol M. Highsmith in 2011" width="1920" height="1280" fetchpriority="high" decoding="async"><small>GREENWICH HARBOR · ARCHIVE · <a href="image-credits.html" target="_blank" rel="noopener">PHOTO CREDIT</a></small></div><h1>SITUATION<br>OVERVIEW</h1><p>MARKETS <span>·</span> WEATHER <span>·</span> WORLD</p></section><section class="desk-watch"><h2>WATCH DESK</h2><dl>${rows.map(([i,k,v])=>`<div><dt>${deskIcon(i)}${k}</dt><dd>${esc(v)}</dd></div>`).join('')}</dl><p>${hasData?'Latest available readings · source timing varies':'Awaiting source updates'}</p></section></div>`;
 }
 vestaboardHTML=function(q,plain=false){return `<section class="desk-quote"><span class="desk-quote-rule"></span><blockquote>${esc(q.q)}</blockquote><p>${plain?'':'— '}${esc(q.a)}</p></section>`;};
 animateVestaboard=function(){stopVestaboard();};
@@ -44,6 +44,18 @@ function deskPreload(page){
  }
 }
 function deskMedia(){
+ // Large editorial images get a consistent frame; small team/airline logos
+ // remain transparent rather than inheriting the photographic border.
+ for(const img of $('spotBody').querySelectorAll('.ap-img,.art-img')){
+  if(!img.closest('.desk-picture')){const frame=document.createElement('figure');frame.className='desk-picture';img.before(frame);frame.append(img);}
+  if(!img.alt)img.alt=img.closest('.ap-wrap,.art-wrap')?.querySelector('.ap-title,.art-info .t')?.textContent||'Featured image';
+ }
+ for(const img of $('spotBody').querySelectorAll('img')){
+  if(!img.matches('.ap-img,.art-img,.fl-photo,.radar-img,.usr-img')&&!img.closest('.desk-photo')){
+   const rect=img.getBoundingClientRect();if(rect.width<=160&&rect.height<=160)img.classList.add('desk-logo');
+  }
+ }
+
  for(const img of $('spotBody').querySelectorAll('img')){
   img.decoding='async';img.addEventListener('load',deskFit,{once:true});
   const fallback=()=>{if(!img.isConnected)return;const note=document.createElement('div');note.className='desk-media-error';note.textContent=(img.alt||'Image')+' temporarily unavailable';img.replaceWith(note);};
@@ -174,3 +186,18 @@ if(new URLSearchParams(location.search).has('diagnostics')){
  const meter=document.createElement('span');meter.id='deskDiagnostics';$('deskStatus').append(meter);
  const sample=now=>{if(!document.hidden){frames++;maxGap=Math.max(maxGap,now-last);if(now-start>=2000){meter.textContent=`${Math.round(frames*1000/(now-start))} FPS · max ${Math.round(maxGap)}ms · requests ${deskActive}/4`;frames=0;start=now;maxGap=0;}}else{frames=0;start=now;maxGap=0;}last=now;requestAnimationFrame(sample);};requestAnimationFrame(sample);
 }
+
+// Local, licensed collection keeps the gallery available when the museum image
+// host is blocked. Only the selected work is loaded; the full set is not decoded.
+let deskArtCollection=null;
+const deskFetchArtOriginal=fetchArt;
+fetchArt=async function(){
+ try{
+  const collection=deskArtCollection||(deskArtCollection=await jget('desk-art/collection.json'));
+  if(!collection.length)throw new Error('Empty art collection');
+  const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/New_York'});
+  const day=Math.floor(Date.parse(today+'T00:00:00Z')/86400000);
+  const work=collection[((day%collection.length)+collection.length)%collection.length];
+  S.art={...work,date:today,desc:String(work.desc||'').replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim()};
+ }catch(e){await deskFetchArtOriginal();}
+};
