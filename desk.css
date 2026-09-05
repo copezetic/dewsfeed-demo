@@ -26,3 +26,6 @@ body::after,#depth,#pageBg,#hud,.pg-wm,.intro,.intro-stage>.intro{display:none!i
 .desk-quote{max-width:82vw;padding:4vh 2vw}.desk-quote-rule{display:block;width:5vw;height:2px;background:var(--amber);margin-bottom:4vh}.desk-quote blockquote{font:400 clamp(26px,5.8vh,68px)/1.25 var(--sans);letter-spacing:-.025em;margin:0}.desk-quote p{font:400 2.5vh/1.5 var(--sans);color:var(--ink-dim);margin:3vh 0 0}
 #spotBody .lis-map{border-radius:0;background:#101d27}#spotBody .lis-map text{fill:#9eb5c5;letter-spacing:.08em}#spotBody .lis-info .v{font-weight:500}#spotBody .buoy{animation:buoyblink var(--per,3s) infinite step-end!important}
 @media(prefers-reduced-motion:reduce){#spotBody .buoy{animation:none!important}}
+
+#spotBody .amb-solar .orb{animation:orbSpin var(--orbit-period,20s) linear infinite!important;animation-delay:var(--orbit-phase,0s)!important}
+@media(prefers-reduced-motion:reduce){#spotBody .amb-solar .orb{animation:none!important}}

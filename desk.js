@@ -86,6 +86,9 @@ $('deskPause').addEventListener('click',()=>{deskState.paused=!deskState.paused;
 document.addEventListener('keydown',e=>{if(/SELECT|INPUT|TEXTAREA|BUTTON/.test(e.target.tagName))return;if(e.key==='ArrowRight')$('deskNext').click();else if(e.key==='ArrowLeft')$('deskPrevious').click();else if(e.code==='Space'){e.preventDefault();$('deskPause').click();}});
 document.addEventListener('visibilitychange',()=>{document.body.classList.toggle('desk-hidden',document.hidden);if(document.hidden){clearTimeout(spotTimer);stopVestaboard();stopWorldClock();for(const v of document.querySelectorAll('video'))v.pause();}else {if(deskState.current==='WORLD CLOCK')startWorldClock();if(deskState.current==='GET IT DONE'){buildSpots();spotIdx=Math.max(0,spots.findIndex(s=>s.k===deskState.current));showSpot();}deskSchedule(CFG.spotSeconds*1000);}});
 window.addEventListener('resize',deskFit);
+const deskSolarOriginal=solarHTML;
+solarHTML=()=>deskSolarOriginal().replace(/animation-duration:/g,'--orbit-period:').replace(/animation-delay:/g,'--orbit-phase:');
+AMBIENT.find(scene=>scene.k==='SOLAR SYSTEM').b=solarHTML;
 const deskAmbientOriginal=showAmbient;
 showAmbient=function(){const shown=deskAmbientOriginal();if(shown){deskState.current=$('spotKickerTxt').textContent;$('deskPosition').textContent='NIGHT / '+deskState.current;$('deskPages').value='';deskMedia();if(deskState.paused||document.hidden)clearTimeout(spotTimer);}return shown;};
 // Refresh the watch values without replacing its photograph or restarting motion.
