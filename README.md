@@ -17,9 +17,11 @@ AI-generated illustration, not a live camera or navigational image.
 Add `?diagnostics` to display sampled browser FPS, longest frame interval in each
 sample, and active bounded data requests. This measures the current device only.
 
-The office and public editions share `desk.css`, `desk.js`, and `desk-harbor.webp`.
-Keep these three files identical. Retain the edition-specific `index.html` and
-never copy office credentials into this public repository. The Pi deployment
+The office and public editions share `desk.css`, `desk.js`, `design.css`,
+`design.js`, `sports.js` and the artwork. This folder is rebuilt from the office
+copy by its `sync_public_preview.py`, which derives the public `index.html`
+(no credentials, generic addresses, no office proxy) and refuses to finish if
+anything private is present. Do not edit the shared files here by hand. The Pi deployment
 script includes all three assets. A real Pi performance check remains necessary.
 
 ## Full-screen broadcast mode

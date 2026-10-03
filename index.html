@@ -49,7 +49,13 @@
               font-variant-numeric:tabular-nums}
   .wx-slot .v .e{font-size:4.2vh}
   #wx1V{color:var(--cyan)} #wx2V{color:var(--amber)}
-  #proxyDot{width:1.1vh;height:1.1vh;border-radius:50%;background:var(--ink-faint);flex:0 0 auto}
+  .wx-slot.net .v{font-size:2.3vh;font-weight:400;letter-spacing:.1em;color:var(--ink);white-space:nowrap;line-height:1.3;padding-top:.6vh}
+.wx-slot.net .v .bars{color:var(--up);margin-left:.35em;letter-spacing:0}
+.wx-slot.net .v .ip{font-size:1.5vh;color:var(--ink-dim);letter-spacing:.06em;margin-left:.6em}
+.wx-slot.net{flex:0 0 auto}
+@media(max-width:1100px){.wx-slot.net{display:none}}
+.wx-slot.net .v.off{color:var(--yellow)}
+#proxyDot{width:1.1vh;height:1.1vh;border-radius:50%;background:var(--ink-faint);flex:0 0 auto}
   #proxyDot.ok{background:var(--up);box-shadow:0 0 8px var(--up)}
   #proxyDot.warn{background:var(--yellow)}
 
@@ -1219,8 +1225,9 @@
   #alertStrip.show{display:flex}
   #alertStrip .puls{animation:pulse 1.1s infinite}
 </style>
-<link rel="stylesheet" href="desk.css?v=20260905-spacing1">
-<link rel="preload" as="image" href="desk-waterfront.webp">
+<link rel="stylesheet" href="desk.css?v=20261003-design1">
+<link rel="preload" as="image" href="desk-greenwich-harbor.webp">
+<link rel="stylesheet" href="design.css?v=20261003-design1">
 </head>
 <body>
 <!-- Ambient depth field: two parallax particle layers + volumetric orbs.
@@ -1240,6 +1247,7 @@
   <div class="top-wx">
     <div class="wx-slot"><div class="l">GREENWICH</div><div class="v" id="wx1V">—</div></div>
     <div class="wx-slot"><div class="l">THE LAKE</div><div class="v" id="wx2V">—</div></div>
+    <div class="wx-slot net"><div class="l">NETWORK</div><div class="v" id="netV">—</div></div>
     <div id="proxyDot" title="proxy status"></div>
   </div>
 </div>
@@ -1319,7 +1327,17 @@ async function jget(u){const r=await fetch(u);if(!r.ok)throw new Error(r.status)
 async function tget(u){const r=await fetch(u);if(!r.ok)throw new Error(r.status);return r.text();}
 const viaProxy=u=>CFG.proxy+"/p?u="+encodeURIComponent(u);
 
-const S={ spx:null,btc:null,pnbk:null,fng:null, rates:{}, sparks:{}, sparkKind:{},
+// Every write to S stamps S_AT[key], so each page can show how old its data is.
+const S_AT={};
+function deskStamped(raw){
+  const nested=["rates","sparks","sparkKind","mort","ships"];
+  const kid=(key,o)=>new Proxy(o,{set(t,k,v){t[k]=v;S_AT[key]=Date.now();return true;}});
+  for(const k of nested) if(raw[k]) raw[k]=kid(k,raw[k]);
+  return new Proxy(raw,{set(t,k,v){
+    t[k]=(nested.includes(k)&&v&&typeof v==="object")?kid(k,v):v;
+    S_AT[k]=Date.now();return true;}});
+}
+const S=deskStamped({ spx:null,btc:null,pnbk:null,fng:null, rates:{}, sparks:{}, sparkKind:{},
           games:[], natNews:[], locNews:[], bankNews:[], sportsNews:[], traffic:null,
           tides:null, lakeTemp:null, flights:[], forecast:[], hourly:[],
           buoy:null, whoop:null, tasks:[], alerts:[], apod:null, art:null,
@@ -1327,7 +1345,7 @@ const S={ spx:null,btc:null,pnbk:null,fng:null, rates:{}, sparks:{}, sparkKind:{
           predict:[], riaNews:[],
           launches:[], issPasses:[], curve:null, mort:{}, fx:null, air:null,
           iss:null, maNews:[], techNews:[], sciNews:[], hn:[], horo:[],
-          ships:{} };
+          ships:{} });
 
 /* ── clock + wordmark ── */
 function tick(){
@@ -1354,7 +1372,7 @@ F:["11111","10000","10000","11110","10000","10000","10000"],
   [...word].forEach((ch,ci)=>{const g=F[ch]||F[" "];
     for(let r=0;r<7;r++)for(let c=0;c<5;c++){
       const on=g[r][c]==="1";
-      ctx.fillStyle=on?"#ffb400":"rgba(255,180,0,.07)";
+      ctx.fillStyle=on?"#d1b17c":"rgba(255,180,0,.07)";
       if(on){ctx.shadowColor="rgba(255,180,0,.8)";ctx.shadowBlur=4}else ctx.shadowBlur=0;
       ctx.beginPath();ctx.arc(ci*adv+c*(dot+gap)+dot/2,r*(dot+gap)+dot/2,dot/2,0,7);ctx.fill();
     }});
@@ -1531,8 +1549,8 @@ function airlineName(cs){
 /* ══════════════ SVG ART LIBRARY — zero emoji, everything drawn ══════════════ */
 function wxSVG(kind,cls){
   cls=cls||"wxi";
-  const sun=`<circle cx="32" cy="30" r="12" fill="#ffd23f"/>`+
-    [0,45,90,135,180,225,270,315].map(a=>`<line x1="32" y1="12" x2="32" y2="6" stroke="#ffd23f" stroke-width="4" stroke-linecap="round" transform="rotate(${a} 32 30)"/>`).join("");
+  const sun=`<circle cx="32" cy="30" r="12" fill="#d9c07a"/>`+
+    [0,45,90,135,180,225,270,315].map(a=>`<line x1="32" y1="12" x2="32" y2="6" stroke="#d9c07a" stroke-width="4" stroke-linecap="round" transform="rotate(${a} 32 30)"/>`).join("");
   const cloud=(f,dy=0)=>`<g transform="translate(0 ${dy})"><circle cx="25" cy="36" r="10" fill="${f}"/><circle cx="37" cy="31" r="12" fill="${f}"/><circle cx="48" cy="37" r="8" fill="${f}"/><rect x="19" y="36" width="35" height="10" rx="5" fill="${f}"/></g>`;
   const drops=n=>Array.from({length:n},(_,i)=>`<line x1="${27+i*9}" y1="51" x2="${24+i*9}" y2="60" stroke="#4fc3ff" stroke-width="3.5" stroke-linecap="round"/>`).join("");
   const flakes=n=>Array.from({length:n},(_,i)=>`<circle cx="${27+i*9}" cy="55" r="2.6" fill="#cfe6ff"/>`).join("");
@@ -1652,7 +1670,7 @@ tornado:`<svg class="wire" viewBox="0 0 200 165">
 </svg>`,
 candles:`<svg viewBox="0 0 300 120">${Array.from({length:11},(_,i)=>{
   const up=(i*7)%3!==0, h=18+((i*29)%52), y=104-h;
-  const c=up?"#39d353":"#ff5a5a";
+  const c=up?"#a5c7a6":"#ea9a83";
   return `<g class="cd" style="animation-delay:${(i*.12).toFixed(2)}s"><line x1="${16+i*26}" y1="${y-8}" x2="${16+i*26}" y2="${y+h+8}" stroke="${c}" stroke-width="2"/><rect x="${9+i*26}" y="${y}" width="14" height="${h}" rx="2" fill="${c}"/></g>`;}).join("")}</svg>`,
 };
 
@@ -1665,7 +1683,7 @@ async function fetchFlights(){
   if(PROXY_OK){ try{ j=await jget(viaProxy(u)); }catch(e){} }
   if(!j){ try{ j=await jget(u); }catch(e){} }
   if(!j||!j.states)return;
-  S.flights=j.states
+  S.airspace=j.states
     .filter(s=>s[5]!=null&&s[6]!=null&&!s[8])
     .map(s=>({hex:s[0],cs:(s[1]||"").trim()||s[0].toUpperCase(),
       lon:s[5],lat:s[6],
@@ -1674,7 +1692,8 @@ async function fetchFlights(){
       hdg:s[10]||0,
       dist:hav(CFG.office.lat,CFG.office.lon,s[6],s[5])}))
     .sort((a,b2)=>a.dist-b2.dist)
-    .slice(0,8);
+    .slice(0,250);
+  S.flights=S.airspace.slice(0,8); // photographic overhead card stays compact
   S.flightsAt=Date.now();   // freshness stamp — radar hides when stale
   // Photo of an actual overhead airframe (matched by transponder hex) via
   // Planespotters. Small GA planes often have no photo, so walk the three
@@ -1917,13 +1936,13 @@ const LIS_COAST=[
 const LIS_BUOYS=[
   // true station positions projected into the same chart space
   {x:203,y:199,c:"#f2f4f8",per:5.0,n:"44025"},   // west-central sound, Fl W
-  {x:562,y:66, c:"#39d353",per:6.0,n:"NLON"},    // New London approach, Fl G
-  {x:250,y:140,c:"#ff4757",per:4.0,n:"BPT"},     // Bridgeport approach, Fl R
+  {x:562,y:66, c:"#a5c7a6",per:6.0,n:"NLON"},    // New London approach, Fl G
+  {x:250,y:140,c:"#e2725b",per:4.0,n:"BPT"},     // Bridgeport approach, Fl R
   {x:607,y:177,c:"#f2f4f8",per:5.0,n:"MTK"},     // Montauk / Block Is Sound
-  {x:95, y:248,c:"#ff4757",per:4.0,n:"ExRk"},    // Execution Rocks
-  {x:273,y:173,c:"#39d353",per:5.0,n:"STRAT",dy:-16},   // Stratford Shoal
+  {x:95, y:248,c:"#e2725b",per:4.0,n:"ExRk"},    // Execution Rocks
+  {x:273,y:173,c:"#a5c7a6",per:5.0,n:"STRAT",dy:-16},   // Stratford Shoal
   {x:481,y:95, c:"#f2f4f8",per:5.0,n:"SAYBK"},   // Saybrook approach
-  {x:398,y:108,c:"#ff4757",per:3.0,n:"FAULK"},   // Faulkner Is
+  {x:398,y:108,c:"#e2725b",per:3.0,n:"FAULK"},   // Faulkner Is
 ];
 /* ══════════════ AIS — live vessels for the LIS chart ═════════════════ */
 // aisstream.io free websocket: subscribe once with a bounding box matching
@@ -1965,11 +1984,11 @@ function lisShips(){
     if(x<4||x>636||y<4||y>316)return "";
     const moving=(s.sog||0)>=0.5;
     return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(s.cog||0).toFixed(0)})">
-        <path d="M0 -7 L4.5 6 L0 3 L-4.5 6 Z" fill="${moving?"#4fd7e8":"#8fa3c0"}"
+        <path d="M0 -7 L4.5 6 L0 3 L-4.5 6 Z" fill="${moving?"#a5c8c3":"#8fa3c0"}"
           stroke="#0a1826" stroke-width=".8" opacity=".95"/>
       </g>
       ${moving&&s.name?`<text x="${(x+8).toFixed(1)}" y="${(y+3).toFixed(1)}" font-size="9"
-        fill="#4fd7e8" opacity=".8">${esc(s.name.slice(0,12))}</text>`:""}`;
+        fill="#a5c8c3" opacity=".8">${esc(s.name.slice(0,12))}</text>`:""}`;
   }).join("");
   return {marks,count:live.length};
 }
@@ -1999,7 +2018,7 @@ function lisChartHTML(){
       <div class="row"><div class="l">NEXT TIDE · STAMFORD</div>
         <div class="v gold">${S.tides||"—"}</div></div>
       ${CFG.aisKey?`<div class="row"><div class="l">VESSELS · AIS</div>
-        <div class="v" style="color:#4fd7e8">${ships.count||"—"}</div></div>`:""}
+        <div class="v" style="color:#a5c8c3">${ships.count||"—"}</div></div>`:""}
     </div>`;
   return `<div class="lis-wrap">
     <div class="lis-map"><svg viewBox="0 0 640 320">
@@ -2352,7 +2371,7 @@ async function fetchFx(){
 }
 
 /* ══════════════ DAILY HOROSCOPE — household signs ════════════════════════ */
-const HORO_SIGNS=[["sagittarius","♐","#ffb400"],["gemini","♊","#4fd7e8"],["virgo","♍","#4ade5b"]];
+const HORO_SIGNS=[["sagittarius","♐","#d1b17c"],["gemini","♊","#a5c8c3"],["virgo","♍","#a5c7a6"]];
 async function fetchHoro(){
   const out=[];
   for(const [sign,glyph,col] of HORO_SIGNS){
@@ -2397,10 +2416,10 @@ async function fetchAir(){
     S.air=j.current||null;
   }catch(e){}
 }
-const aqiBand=v=>v<=50?["GOOD","#4ade5b"]:v<=100?["MODERATE","#ffb400"]:
-  v<=150?["UNHEALTHY SG","#ff7a00"]:["UNHEALTHY","#ff5a5a"];
-const uvBand=v=>v<3?["LOW","#4ade5b"]:v<6?["MODERATE","#ffb400"]:
-  v<8?["HIGH","#ff7a00"]:["VERY HIGH","#ff5a5a"];
+const aqiBand=v=>v<=50?["GOOD","#a5c7a6"]:v<=100?["MODERATE","#d1b17c"]:
+  v<=150?["UNHEALTHY SG","#ff7a00"]:["UNHEALTHY","#ea9a83"];
+const uvBand=v=>v<3?["LOW","#a5c7a6"]:v<6?["MODERATE","#d1b17c"]:
+  v<8?["HIGH","#ff7a00"]:["VERY HIGH","#ea9a83"];
 
 /* ══════════════ RAIN NOWCAST — alert when rain starts at the office ══════ */
 let rainWet=null;   // null until first reading — no alert on boot
@@ -2531,9 +2550,9 @@ function worldClockHTML(){
        fill="none" stroke="rgba(255,180,0,.4)" stroke-width="1.3" stroke-dasharray="4 6"/>`).join("");
   const marks=WC_MARKS.map(([x,y,home],i)=>`
     <g class="wcm" style="--d:${(i*.55).toFixed(2)}s">
-      <circle cx="${x}" cy="${y}" r="4" fill="${home?"#ffb400":"#4fd7e8"}"/>
+      <circle cx="${x}" cy="${y}" r="4" fill="${home?"#d1b17c":"#a5c8c3"}"/>
       <circle class="ring" cx="${x}" cy="${y}" r="4" fill="none" stroke-width="1.5"
-        stroke="${home?"#ffb400":"#4fd7e8"}"/>
+        stroke="${home?"#d1b17c":"#a5c8c3"}"/>
     </g>`).join("");
   return `<div class="wc-stage">
     <svg class="wc-map" viewBox="0 0 640 320">
@@ -2643,7 +2662,6 @@ function solarHTML(){
 const AMBIENT=[
   {k:"VOLCANO NIGHTS",  b:volcanoHTML, ok:()=>(CFG.nightVideo&&!S.volcanoDead)||CFG.nightVideoYT, dur:300000},
   {k:"ISS EARTH VIEW",  b:issLiveHTML, ok:()=>true, dur:240000},
-  {k:"AURORA BOREALIS", b:auroraHTML,  ok:()=>true, dur:150000},
   {k:"SOLAR SYSTEM",    b:solarHTML,   ok:()=>true, dur:150000},
 ];
 let ambIdx=0, ambCycles=0, ambPending=false;
@@ -2762,7 +2780,7 @@ function buildSpots(){
     const fngLbl=S.fng==null?"":S.fng>=75?"EXTREME GREED":S.fng>=55?"GREED":S.fng>=45?"NEUTRAL":S.fng>=25?"FEAR":"EXTREME FEAR";
     const panel=(label,logo,q,pts,k)=>{
       if(!q)return "";
-      const col=q.chg>=0?"#4ade5b":"#ff5a5a";
+      const col=q.chg>=0?"#a5c7a6":"#ea9a83";
       const chart=(pts&&pts.length>1)
         ? sparkSVG(pts,560,120,col)
         : `<div class="nodata">CHART LOADING…</div>`;
@@ -2806,7 +2824,7 @@ function buildSpots(){
   if(S.predict.length){
     spots.push({k:"PREDICTION MARKETS",acc:"var(--purple)",html:true,dur:16000,
       body:`<div class="pm-wrap">${S.predict.map(m=>{
-        const col=m.yes>=60?"#4ade5b":m.yes>=40?"#ffb400":"#ff5a5a";
+        const col=m.yes>=60?"#a5c7a6":m.yes>=40?"#d1b17c":"#ea9a83";
         const vol=m.vol>=1e6?"$"+(m.vol/1e6).toFixed(1)+"M":"$"+Math.round(m.vol/1e3)+"K";
         return `<div class="pm">
           <span class="pct" style="color:${col}">${m.yes}%</span>
@@ -2842,10 +2860,10 @@ function buildSpots(){
         <div class="rd-chart">
           <div class="rd-h">US TREASURY YIELD CURVE ${inv?'<b class="inv">· INVERTED</b>':""}</div>
           <svg viewBox="0 0 ${W} ${H}">
-            <path d="${line}" fill="none" stroke="${inv?"#ff5a5a":"#ffb400"}" stroke-width="3.5"
+            <path d="${line}" fill="none" stroke="${inv?"#ea9a83":"#d1b17c"}" stroke-width="3.5"
               stroke-linecap="round" stroke-linejoin="round"/>
             ${S.curve.map((p,i)=>`
-              <circle cx="${xs(i).toFixed(1)}" cy="${ys(p.v).toFixed(1)}" r="5" fill="${inv?"#ff5a5a":"#ffb400"}"/>
+              <circle cx="${xs(i).toFixed(1)}" cy="${ys(p.v).toFixed(1)}" r="5" fill="${inv?"#ea9a83":"#d1b17c"}"/>
               <text x="${xs(i).toFixed(1)}" y="${H-14}" fill="#8fa3c0" font-size="17"
                 text-anchor="middle" font-family="monospace">${p.lbl}</text>
               <text x="${xs(i).toFixed(1)}" y="${(ys(p.v)-16).toFixed(1)}" fill="#e8ecf2" font-size="17"
@@ -2935,7 +2953,7 @@ function buildSpots(){
     body:moonPageHTML(), sub:""});
 
   /* WORLD CLOCK — live analog + digital, home first then west→east */
-  bumper("GLOBAL OPS","🌍","bg-stars","var(--red,#ff4757)");
+  bumper("GLOBAL OPS","🌍","bg-stars","var(--red,#e2725b)");
   spots.push({k:"WORLD CLOCK",acc:"var(--cyan)",html:true,
     body:worldClockHTML(), after:startWorldClock, sub:""});
 
@@ -2947,14 +2965,14 @@ function buildSpots(){
     const marks=S.quakes.map((q,i)=>{
       const {x,y}=px(q);
       const r=Math.max(2,(q.mag-1)*1.5).toFixed(1);
-      const c=q.mag>=6?"#ff4757":q.mag>=4.5?"#ffb400":"#4fd7e8";
+      const c=q.mag>=6?"#e2725b":q.mag>=4.5?"#d1b17c":"#a5c8c3";
       const ring=i<3?`<circle class="ring" cx="${x}" cy="${y}" r="${r}" fill="none"
         stroke="${c}" stroke-width="1.5" style="--d:${(i*.7).toFixed(1)}s"/>`:"";
       const lbl=i<3?`<text x="${x}" y="${(+y-(+r)-4).toFixed(1)}" font-size="11"
         fill="${c}" text-anchor="middle" font-weight="bold">M${q.mag.toFixed(1)}</text>`:"";
       return `<circle cx="${x}" cy="${y}" r="${r}" fill="${c}" opacity=".85"/>${ring}${lbl}`;
     }).join("");
-    spots.push({k:"EARTHQUAKE WATCH",acc:"var(--red,#ff4757)",html:true,dur:15000,
+    spots.push({k:"EARTHQUAKE WATCH",acc:"var(--red,#e2725b)",html:true,dur:15000,
       body:`<div class="wc-stage">
         <svg class="wc-map qk-map" viewBox="0 0 640 320">
           <path d="${WORLD_PATH}" fill="rgba(52,82,122,.20)" stroke="rgba(110,160,210,.38)" stroke-width="1"/>
@@ -2996,12 +3014,12 @@ function buildSpots(){
     const lights=CITIES.map(([lo,la])=>
       `<circle cx="${X(lo).toFixed(1)}" cy="${Y(la).toFixed(1)}" r="1.7" fill="#ffd27a" opacity=".85"/>`).join("");
     const dots=S.quakes.slice(0,20).map(q=>
-      `<circle cx="${X(q.lon).toFixed(1)}" cy="${Y(q.lat).toFixed(1)}" r="2.6" fill="#ffb400" opacity=".8"/>`).join("");
+      `<circle cx="${X(q.lon).toFixed(1)}" cy="${Y(q.lat).toFixed(1)}" r="2.6" fill="#d1b17c" opacity=".8"/>`).join("");
     const issMark=S.iss?`<g>
       <circle cx="${X(S.iss.lon).toFixed(1)}" cy="${Y(S.iss.lat).toFixed(1)}" r="9" fill="none"
-        stroke="#4fd7e8" stroke-width="1.4" opacity=".8"/>
-      <circle cx="${X(S.iss.lon).toFixed(1)}" cy="${Y(S.iss.lat).toFixed(1)}" r="3" fill="#4fd7e8"/>
-      <text x="${(X(S.iss.lon)+13).toFixed(1)}" y="${(Y(S.iss.lat)+4).toFixed(1)}" fill="#4fd7e8"
+        stroke="#a5c8c3" stroke-width="1.4" opacity=".8"/>
+      <circle cx="${X(S.iss.lon).toFixed(1)}" cy="${Y(S.iss.lat).toFixed(1)}" r="3" fill="#a5c8c3"/>
+      <text x="${(X(S.iss.lon)+13).toFixed(1)}" y="${(Y(S.iss.lat)+4).toFixed(1)}" fill="#a5c8c3"
         font-size="13" font-family="monospace" font-weight="bold">ISS</text></g>`:"";
     const grid=[...Array(5)].map((_,i)=>
       `<line x1="0" y1="${(i+1)*53.3}" x2="640" y2="${(i+1)*53.3}"/>`).join("")+
@@ -3020,7 +3038,7 @@ function buildSpots(){
     };
     const topQ=S.quakes.length?Math.max(...S.quakes.map(q=>q.mag||0)):null;
     const zulu=now.toISOString().slice(11,16);
-    spots.push({k:"GLOBAL SITREP",acc:"var(--red,#ff4757)",html:true,dur:22000,
+    spots.push({k:"GLOBAL SITREP",acc:"var(--red,#e2725b)",html:true,dur:22000,
       body:`<div class="sd-wrap">
         <div class="sd-map">
           <svg viewBox="0 0 640 330" preserveAspectRatio="xMidYMid meet">
@@ -3052,43 +3070,12 @@ function buildSpots(){
             ${wire.map(h=>item(h,false)).join("")}
           </div>
           <div class="sd-tiles">
-            ${topQ?`<div class="sd-t"><div class="l">SEISMIC 24H</div><div class="v" style="color:#ffb400">M${topQ.toFixed(1)}</div></div>`:""}
-            ${S.kp!=null?`<div class="sd-t"><div class="l">PLANETARY KP</div><div class="v" style="color:${S.kp>=5?"#ff5a5a":"#4ade5b"}">${S.kp.toFixed(1)}</div></div>`:""}
+            ${topQ?`<div class="sd-t"><div class="l">SEISMIC 24H</div><div class="v" style="color:#d1b17c">M${topQ.toFixed(1)}</div></div>`:""}
             ${flightsFresh()?`<div class="sd-t"><div class="l">AIR TRAFFIC</div><div class="v" style="color:var(--cyan)">${S.flights.length} OVHD</div></div>`:""}
           </div>
         </div>
       </div>`,
       sub:"CONFLICT + WIRE: WORLD NEWS · MAP: LIVE TERMINATOR · USGS · ISS"});
-  }
-
-  /* AURORA WATCH — planetary Kp gauge */
-  if(S.kp!=null){
-    const kp=S.kp;
-    const status=kp>=8?"SEVERE STORM G4+":kp>=7?"STRONG STORM G3":kp>=6?"MODERATE STORM G2"
-      :kp>=5?"MINOR STORM G1":kp>=4?"ACTIVE":"QUIET";
-    const vis=kp>=7?"AURORA POSSIBLE OVER CONNECTICUT":kp>=6?"VISIBLE FROM NORTHERN NEW ENGLAND"
-      :kp>=5?"VISIBLE FROM CANADA / N. BORDER":"NOT VISIBLE AT THIS LATITUDE";
-    const col=kp>=6?"#ff4757":kp>=4?"#ffb400":"#39d353";
-    const ang=(-90+Math.min(9,kp)/9*180).toFixed(1);
-    spots.push({k:"AURORA WATCH",acc:"var(--teal)",html:true,dur:12000,
-      body:`<div class="kp-wrap">
-        <svg class="kp-gauge" viewBox="0 0 220 130">
-          <path d="M20,110 A90,90 0 0 1 200,110" fill="none" stroke="#1c2534" stroke-width="14" stroke-linecap="round"/>
-          <path d="M20,110 A90,90 0 0 1 92,24" fill="none" stroke="#2c5d3f" stroke-width="14" stroke-linecap="round"/>
-          <path d="M92,24 A90,90 0 0 1 155,36" fill="none" stroke="#7d6224" stroke-width="14" stroke-linecap="round"/>
-          <path d="M155,36 A90,90 0 0 1 200,110" fill="none" stroke="#77303a" stroke-width="14" stroke-linecap="round"/>
-          <g transform="rotate(${ang} 110 110)">
-            <line x1="110" y1="110" x2="110" y2="34" stroke="${col}" stroke-width="4" stroke-linecap="round"/>
-          </g>
-          <circle cx="110" cy="110" r="7" fill="${col}"/>
-        </svg>
-        <div class="kp-info">
-          <div class="v" style="color:${col}">KP ${kp.toFixed(1)}</div>
-          <div class="s" style="color:${col}">${status}</div>
-          <div class="p">${vis}</div>
-        </div>
-      </div>`,
-      sub:"NOAA SPACE WEATHER · PLANETARY K-INDEX · UPDATES 30 MIN"});
   }
 
   /* STANDINGS — AL East + AFC East (NFL column hides out of season) */
@@ -3244,7 +3231,7 @@ function buildSpots(){
      daily history (accrues in KV; charts fill in as days land) */
   if(S.whoop){
     const w=S.whoop, rec=Math.round(w.recovery_score||0);
-    const recCol=rec>=67?"#39d353":rec>=34?"#ffd23f":"#ff4757";
+    const recCol=rec>=67?"#a5c7a6":rec>=34?"#d9c07a":"#e2725b";
     const R=150, C=2*Math.PI*R, dash=(rec/100)*C;
     // last 14 days of history → bar charts (recovery color-banded, strain cyan)
     const days=Object.keys(w.hist||{}).sort().slice(-14);
@@ -3265,7 +3252,7 @@ function buildSpots(){
       }).join("");
       return `<svg viewBox="0 0 ${W} ${H}">${bars||""}</svg>`;
     };
-    const recBar=v=>v>=67?"#39d353":v>=34?"#ffd23f":"#ff4757";
+    const recBar=v=>v>=67?"#a5c7a6":v>=34?"#d9c07a":"#e2725b";
     const haveHist=days.length>=2;
     spots.push({k:"WHOOP RECOVERY",acc:recCol,html:true,dur:18000,
       body:`<div class="wh-page">
@@ -3282,13 +3269,13 @@ function buildSpots(){
           <div class="wh-tiles">
             <div class="wh-tile"><div class="l">STRAIN</div><div class="v" style="color:var(--cyan)">${(w.strain||0).toFixed(1)}</div></div>
             <div class="wh-tile"><div class="l">HRV</div><div class="v" style="color:var(--amber)">${Math.round(w.hrv||0)}<span style="font-size:2.4vh"> MS</span></div></div>
-            <div class="wh-tile"><div class="l">RESTING HR</div><div class="v" style="color:var(--red,#ff4757)">${Math.round(w.rhr||0)}<span style="font-size:2.4vh"> BPM</span></div></div>
+            <div class="wh-tile"><div class="l">RESTING HR</div><div class="v" style="color:var(--red,#e2725b)">${Math.round(w.rhr||0)}<span style="font-size:2.4vh"> BPM</span></div></div>
             <div class="wh-tile"><div class="l">STEPS</div><div class="v" style="color:var(--green)">${(w.steps||0).toLocaleString()}</div></div>
           </div>
         </div>
         ${haveHist?`<div class="wh-charts">
           <div class="whc"><div class="l">RECOVERY · LAST ${days.length} DAYS</div>${barsSVG("recovery",100,recBar)}</div>
-          <div class="whc"><div class="l">STRAIN · LAST ${days.length} DAYS</div>${barsSVG("strain",21,()=>"#4fd7e8")}</div>
+          <div class="whc"><div class="l">STRAIN · LAST ${days.length} DAYS</div>${barsSVG("strain",21,()=>"#a5c8c3")}</div>
         </div>`:`<div class="wh-note">PROGRESS GRAPHS FILL IN AS DAILY HISTORY ACCRUES</div>`}
       </div>`,
       sub:rec>=67?"GREEN — GO GET IT":rec>=34?"YELLOW — PACE YOURSELF":"RED — RECOVERY DAY"});
@@ -3448,6 +3435,22 @@ async function fetchWx(loc,slot){
     $(slot).innerHTML=Math.round(c.main.temp)+"° <span class='e'>"+wxEmoji(c.weather[0].icon)+"</span>";
   }catch(e){}
 }
+// Masthead network chip: which Wi-Fi the kiosk joined (the Pi has no visible
+// OS chrome). Asks the proxy's /net; degrades to OFFLINE / — without it.
+async function fetchNet(){
+  const el=$("netV");if(!el)return;
+  if(!navigator.onLine){el.textContent="OFFLINE";el.className="v off";return;}
+  try{
+    const r=await fetch(CFG.proxy+"/net",{signal:AbortSignal.timeout(4000)});
+    if(!r.ok)throw new Error(r.status);
+    const n=await r.json();
+    const bars=n.signal==null?"":n.signal>=75?"▂▄▆█":n.signal>=50?"▂▄▆":n.signal>=25?"▂▄":"▂";
+    const label=n.ssid?esc(n.ssid).toUpperCase():n.link==="wired"?"WIRED":"NO LINK";
+    el.innerHTML=label+(bars?` <span class="bars">${bars}</span>`:"")+(n.ip?`<span class="ip">${esc(n.ip)}</span>`:"");
+    el.className="v"+(n.ssid||n.link?"":" off");
+  }catch(e){el.textContent=PROXY_OK?"—":"PROXY OFF";el.className="v"+(PROXY_OK?"":" off");}
+}
+window.addEventListener("online",fetchNet);window.addEventListener("offline",fetchNet);
 async function fetchHourly(){
   try{
     const j=await jget(`https://api.open-meteo.com/v1/forecast?latitude=${CFG.office.lat}&longitude=${CFG.office.lon}&hourly=temperature_2m,precipitation_probability,weathercode&forecast_days=2&temperature_unit=fahrenheit&timezone=America%2FNew_York`);
@@ -3459,17 +3462,19 @@ async function fetchHourly(){
       temp:Math.round(j.hourly.temperature_2m[idx+i]),
       pp:j.hourly.precipitation_probability[idx+i]||0,
     }));
+    S.hourlyAt=Date.now();
   }catch(e){}
 }
 async function fetchForecast(){
   try{
-    const j=await jget(`https://api.open-meteo.com/v1/forecast?latitude=${CFG.office.lat}&longitude=${CFG.office.lon}&daily=weathercode,temperature_2m_max,temperature_2m_min&temperature_unit=fahrenheit&timezone=America%2FNew_York`);
+    const j=await jget(`https://api.open-meteo.com/v1/forecast?latitude=${CFG.office.lat}&longitude=${CFG.office.lon}&daily=weathercode,temperature_2m_max,temperature_2m_min,precipitation_probability_max&temperature_unit=fahrenheit&timezone=America%2FNew_York`);
     const D=["SUN","MON","TUE","WED","THU","FRI","SAT"];
     S.forecast=j.daily.time.slice(0,7).map((t,i)=>({
       day:i===0?"TODAY":D[new Date(t+"T12:00:00").getDay()],
       emoji:wmoEmoji(j.daily.weathercode[i]),
       hi:Math.round(j.daily.temperature_2m_max[i]),
       lo:Math.round(j.daily.temperature_2m_min[i]),
+      pp:j.daily.precipitation_probability_max?.[i]??null,
     }));
   }catch(e){}
 }
@@ -3565,7 +3570,9 @@ async function getStock(sym,key,fbSeries,fbQuote,ivSpark){
   // chart shows today's move too.
   if(q&&pts&&pts.length>1&&pts.at(-1)!==q.cur) pts=[...pts,q.cur];
   if(q){ S[key]=q; try{localStorage.setItem("mk_"+key,JSON.stringify(q));}catch(e){} }
-  else { try{S[key]=JSON.parse(localStorage.getItem("mk_"+key))||S[key];}catch(e){} }
+  else { const at=S_AT[key];            // a cached quote must not read as a fresh one
+         try{S[key]=JSON.parse(localStorage.getItem("mk_"+key))||S[key];}catch(e){}
+         if(at)S_AT[key]=at; else delete S_AT[key]; }
   if(pts&&pts.length>1){ S.sparks[key]=pts; S.sparkKind[key]=kind||"5-DAY";
     try{localStorage.setItem("mkspark_"+key,JSON.stringify(pts.slice(-80)));
         localStorage.setItem("mkkind_"+key,S.sparkKind[key]);}catch(e){} }
@@ -3703,11 +3710,10 @@ async function fetchTraffic(){
     const m=Math.round(s/60);
     return m>=60?Math.floor(m/60)+"h "+(m%60)+"m":m+"m";
   };
-  try{S.traffic={home:await osrm(CFG.home.lat,CFG.home.lon),
-                 lake:await osrm(CFG.lake.lat,CFG.lake.lon),
-                 woodside:await osrm(40.7454,-73.9022),   // coworker commutes
-                 shelton:await osrm(41.3165,-73.0932),
-                 live:false};}catch(e){}
+  S.traffic ||= {live:false}; S.trafficAt ||= {};
+  await Promise.allSettled([['home',CFG.home.lat,CFG.home.lon],['lake',CFG.lake.lat,CFG.lake.lon],['woodside',40.7454,-73.9022],['shelton',41.3165,-73.0932]].map(async([key,lat,lon])=>{
+    const value=await osrm(lat,lon);S.traffic[key]=value;S.trafficAt[key]=Date.now();
+  }));
 }
 const trimToLen=(s,n)=>s.length>n?s.slice(0,n-1)+"…":s;
 function rssTitles(xml,limit){
@@ -3789,7 +3795,9 @@ async function fetchTasks(){
 }
 
 </script>
-<script src="desk.js?v=20260905-spacing1"></script>
+<script src="sports.js?v=20260921-sports1"></script>
+<script src="desk.js?v=20261003-design1"></script>
+<script src="design.js?v=20261003-design1"></script>
 <script>
 /* ══════════════ BOOT ══════════════ */
 (async function boot(){
@@ -3808,12 +3816,15 @@ async function fetchTasks(){
   };
   every(()=>fetchWx(CFG.office,"wx1V"),10*60*1000);
   every(()=>fetchWx(CFG.lake,"wx2V"),10*60*1000);
+  every(fetchNet,60*1000);         // masthead Wi-Fi chip
   every(fetchForecast,60*60*1000);
   every(fetchLake,60*60*1000);
   every(fetchMarkets,10*60*1000);   // 10 min — gentler on Yahoo's rate limiter
   every(fetchHourly,30*60*1000);
   every(fetchRates,60*60*1000);
   every(fetchScores,2*60*1000);
+  every(fetchSportsDesk,5*60*1000);
+  every(fetchConcertBoard,30*60*1000);
   every(fetchTides,30*60*1000);
   every(fetchBuoy,30*60*1000);
   every(fetchTraffic,10*60*1000);
@@ -3826,7 +3837,6 @@ async function fetchTasks(){
   every(fetchArt,6*60*60*1000);    // daily painting; AIC API is unmetered
   every(fetchQuakes,30*60*1000);   // USGS live quake feed
   every(fetchRain,10*60*1000);     // rain-start nowcast alert
-  every(fetchKp,30*60*1000);       // NOAA space weather
   every(fetchStandings,60*60*1000);// division standings
   every(fetchPredict,15*60*1000);  // Polymarket top-volume odds
   every(fetchLaunches,60*60*1000); // Launch Library free tier: 15 req/hr
@@ -3896,10 +3906,6 @@ async function fetchTasks(){
     setTimeout(()=>{buildSpots();
       spotIdx=Math.max(0,spots.findIndex(s=>s.k==="EARTHQUAKE WATCH"));
       showSpot();},3000);
-  if(location.hash==="#testkp")
-    setTimeout(()=>{buildSpots();
-      spotIdx=Math.max(0,spots.findIndex(s=>s.k==="AURORA WATCH"));
-      showSpot();},3000);
   if(location.hash==="#teststandings")
     setTimeout(()=>{buildSpots();
       spotIdx=Math.max(0,spots.findIndex(s=>s.k==="STANDINGS"));
@@ -3936,9 +3942,9 @@ async function fetchTasks(){
   }
   if(location.hash==="#testhorofake"){   // offline layout check — canned data
     S.horo=[
-      {sign:"SAGITTARIUS",glyph:"♐",col:"#ffb400",txt:"Adventure calls today, Sagittarius. A conversation at work opens a door you had written off — walk through it before Friday. Money looks steady; the risk worth taking is social, not financial."},
-      {sign:"GEMINI",glyph:"♊",col:"#4fd7e8",txt:"Your dual nature is an asset today. Balancing two projects feels effortless where others would drop both. An old friend resurfaces with a proposal worth hearing out fully before you decide anything."},
-      {sign:"VIRGO",glyph:"♍",col:"#4ade5b",txt:"Precision pays today, Virgo. The detail everyone else missed is exactly where the problem lives, and you will be the one to find it. Guard an hour of quiet in the afternoon for the finishing touches."}];
+      {sign:"SAGITTARIUS",glyph:"♐",col:"#d1b17c",txt:"Adventure calls today, Sagittarius. A conversation at work opens a door you had written off — walk through it before Friday. Money looks steady; the risk worth taking is social, not financial."},
+      {sign:"GEMINI",glyph:"♊",col:"#a5c8c3",txt:"Your dual nature is an asset today. Balancing two projects feels effortless where others would drop both. An old friend resurfaces with a proposal worth hearing out fully before you decide anything."},
+      {sign:"VIRGO",glyph:"♍",col:"#a5c7a6",txt:"Precision pays today, Virgo. The detail everyone else missed is exactly where the problem lives, and you will be the one to find it. Guard an hour of quiet in the afternoon for the finishing touches."}];
     setTimeout(()=>{buildSpots();
       spotIdx=Math.max(0,spots.findIndex(s=>s.k==="DAILY HOROSCOPE"));
       showSpot();},2500);
@@ -4025,8 +4031,7 @@ async function fetchTasks(){
       showSpot();},3000);
   if(location.hash==="#testvolcano") setTimeout(()=>{ambIdx=0;showAmbient();},1500);
   if(location.hash==="#testiss")     setTimeout(()=>{ambIdx=1;showAmbient();},1500);
-  if(location.hash==="#testaurora")  setTimeout(()=>{ambIdx=2;showAmbient();},1500);
-  if(location.hash==="#testsolar")   setTimeout(()=>{ambIdx=3;showAmbient();},1500);
+  if(location.hash==="#testsolar")   setTimeout(()=>{ambIdx=AMBIENT.findIndex(s=>s.k==='SOLAR SYSTEM');showAmbient();},1500);
 })();
 </script>
 </body>
