@@ -1,5 +1,5 @@
 /* Dews Feed desk system: shared by the office kiosk and public preview. */
-:root{--ground:var(--ground);--card:#10171d;--edge:#29333b;--ink:#e4e9ed;--ink-dim:#98a9b8;--ink-faint:#71818e;--amber:#efa94a;--cyan:#87c3c8;--blue:#789ebd;--teal:#7eb8ab;--green:#8bc5a0;--up:#8bc5a0;--down:#ed8a81;--purple:#b4a9ca;--mono:ui-monospace,SFMono-Regular,Consolas,monospace;--sans:Arial,Helvetica,sans-serif}
+:root{--ground:#091410;--card:#10171d;--edge:#29333b;--ink:#e4e9ed;--ink-dim:#98a9b8;--ink-faint:#71818e;--amber:#efa94a;--cyan:#87c3c8;--blue:#789ebd;--teal:#7eb8ab;--green:#8bc5a0;--up:#8bc5a0;--down:#ed8a81;--purple:#b4a9ca;--mono:ui-monospace,SFMono-Regular,Consolas,monospace;--sans:Arial,Helvetica,sans-serif}
 body{cursor:auto;height:100dvh;background:var(--ground);font-family:var(--sans)}
 body::after,#depth,#pageBg,#hud,.pg-wm,.intro,.intro-stage>.intro{display:none!important}
 /* Expensive decorative scenes are replaced with editorial surfaces. Data and
@@ -182,13 +182,15 @@ body.desk-paused #spotBody .desk-photo img,body.desk-paused #spotBody .amb-solar
 .desk-coastal-actions{display:flex;align-items:center;gap:20px}.desk-coastal a{color:var(--ink-dim);font:max(11px,1.65vh) var(--mono);text-decoration:none}
 .desk-coastal button{border:1px solid #53615e;background:var(--card);color:#eee2c6;border-radius:4px;padding:9px 12px;font:max(12px,1.74vh) var(--mono);cursor:pointer}
 /* Native coastal chart (base layer; the live map iframe covers it where WebGPU exists). */
+/* `#spotBody *{animation:none!important}` silences every page animation; these two are deliberate exceptions. */
+#spotBody .desk-coastal-native .cl-spin{animation:clSpin var(--per,10s) linear var(--delay,0s) infinite!important;will-change:transform}@keyframes clSpin{to{transform:rotate(360deg)}}
 .desk-coastal-native{position:absolute;inset:0;background:var(--ground)}.desk-coastal-native svg{width:100%;height:100%;display:block}
 .desk-coastal-native .cl-labels text{font:9px var(--mono);letter-spacing:.14em;fill:#8fa39c}
 .desk-coastal-native .cl-kicker{font:600 15px var(--mono);letter-spacing:.32em;fill:var(--ink)}.desk-coastal-native .cl-kicker-sub{font:8px var(--mono);letter-spacing:.2em;fill:#8fa39c}
 .desk-coastal-native .cl-ocean{font:18px var(--editorial);letter-spacing:5px;fill:#5c7673}
 .desk-coastal-feature{flex:1;min-width:0;text-align:center}.desk-coastal-feature strong{display:block;font:max(9px,1.50vh) var(--mono);letter-spacing:2px;color:#8b9d9f}.desk-coastal-feature b{display:block;font:400 max(18px,2.31vh) var(--editorial);color:var(--ink);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.desk-coastal-feature span{display:block;font:max(10px,1.55vh) var(--mono);letter-spacing:.12em;color:var(--ink-dim);margin-top:3px}
 .desk-coastal-credit .cl-credit-live{display:none}.desk-coastal-is-live .desk-coastal-credit .cl-credit-osm{display:none}.desk-coastal-is-live .desk-coastal-credit .cl-credit-live{display:inline}
-@media(prefers-reduced-motion:reduce){.desk-coastal-native .cl *{animation:none!important}.desk-coastal-native .cl{opacity:.8}}
+@media(prefers-reduced-motion:reduce){#spotBody .desk-coastal-native .cl *,#spotBody .desk-coastal-native .cl-spin{animation:none!important}.desk-coastal-native .cl{opacity:.8}}
 @media(max-width:650px){.desk-coastal-feature{display:none}}
 body.desk-coastal-active #spotBody{padding:0}body.desk-coastal-active #deskStage{height:100%!important;transform:none!important;width:100%!important}
 body.desk-art-immersive #topbar,body.desk-art-immersive #deskNav,body.desk-art-immersive #deskStatus,body.desk-art-immersive #databar,body.desk-art-immersive #newsbar,body.desk-art-immersive #spotKicker,body.desk-art-immersive #spotSub,body.desk-art-immersive #deskProgress{display:none!important}
@@ -197,7 +199,7 @@ body.desk-art-immersive #spotBody{position:absolute!important;inset:0!important;
 @media(max-width:600px){.desk-coastal-footer{padding:10px;gap:10px}.desk-coastal-actions{align-items:flex-end;flex-direction:column;gap:8px}.desk-coastal a{font-size:9px;max-width:170px}.desk-coastal-footer span{font-size:13px}}
 
 /* ATLAS EDITION — dense information, composed as a collection of visual scenes. */
-:root{--ground:var(--ground);--card:var(--card);--edge:var(--edge);--ink:var(--ink);--ink-dim:var(--ink-dim);--ink-faint:var(--ink-faint);--amber:var(--amber);--cyan:var(--cyan);--blue:#97b5c9;--teal:var(--up);--green:var(--up);--up:var(--up);--down:var(--down);--purple:#bcb2cd;--editorial:var(--editorial)}
+:root{--ground:#091410;--card:#10221d;--edge:#3a463b;--ink:#eee9db;--ink-dim:#a9b5a9;--ink-faint:#849389;--amber:#d1b17c;--cyan:#a5c8c3;--blue:#97b5c9;--teal:var(--up);--green:var(--up);--up:#a5c7a6;--down:#ea9a83;--purple:#bcb2cd;--editorial:Georgia,'Times New Roman',serif}
 #topbar{background:var(--ground);border-bottom:1px solid #7b6d50;box-shadow:none;height:8vh;padding:.8vh 2vw}
 #deskBrand,#clock,#deskBrand b{color:var(--ink);text-shadow:none;font-weight:400}#deskBrand{font-family:var(--editorial);letter-spacing:.06em;font-size:4.2vh}#clock{font-family:var(--editorial);font-size:4.4vh}
 #dateline{display:block;font:1.5vh var(--mono);letter-spacing:.1em;color:var(--ink-dim)}.wx-slot .l{color:var(--ink-dim);font-family:var(--mono)}.wx-slot .v{color:var(--ink);font-variant-numeric:tabular-nums}

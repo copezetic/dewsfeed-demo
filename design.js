@@ -8,6 +8,16 @@
 // office index.html only. The next FOMC decision is added automatically.
 CFG.countdowns = CFG.countdowns || [];
 
+/* ───────── brand mark: a light ───────── */
+const DZ_MARK=`<svg id="deskMark" viewBox="0 0 32 32" aria-hidden="true">
+  <defs><linearGradient id="dzBeamL" x1="1" x2="0"><stop offset="0" stop-color="currentColor" stop-opacity=".75"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient>
+  <linearGradient id="dzBeamR" x1="0" x2="1"><stop offset="0" stop-color="currentColor" stop-opacity=".75"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs>
+  <path class="beam l" d="M16 9 -6 2.5v13z" fill="url(#dzBeamL)"/><path class="beam r" d="M16 9l22-6.5v13z" fill="url(#dzBeamR)"/>
+  <path class="tower" d="M12.2 13.5 10.4 27h11.2l-1.8-13.5z"/><path class="band" d="M11.5 19.2h9l.5 3.6h-10z"/>
+  <rect class="lamp" x="12.6" y="6" width="6.8" height="6.2" rx=".8"/><path class="tower" d="M11.6 6.2 16 2.2l4.4 4z"/>
+  <path class="rail" d="M10.8 13h10.4M8.5 27.4h15"/></svg>`;
+$('deskBrand')?.insertAdjacentHTML('afterbegin',DZ_MARK);
+
 /* ───────── helpers ───────── */
 const dzET=()=>new Date(new Date().toLocaleString('en-US',{timeZone:'America/New_York'}));
 const dzTime=d=>d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit',timeZone:'America/New_York'});
@@ -121,8 +131,9 @@ function dzMarketsHTML(){
     fng!=null?`<article class="dz-panel dz-tile"><header><span>FEAR &amp; GREED</span></header><b>${fng}</b><div class="dz-gauge"><i style="left:${fng}%"></i></div><small>${fngLbl}</small></article>`:'',
   ].filter(Boolean);
   const curve=dzCurveHTML();
-  return `<div class="dz-markets" style="--tiles:${Math.max(1,tiles.length)}">
-    <div class="dz-row dz-quotes">${quote('S&amp;P 500',S.spx,'spx',false)}${quote('PNBK · PATRIOT BANK',S.pnbk,'pnbk',true)}</div>
+  const quotes=quote('S&amp;P 500',S.spx,'spx',false)+quote('PNBK · PATRIOT BANK',S.pnbk,'pnbk',true);
+  return `<div class="dz-markets${quotes?'':' noquotes'}" style="--tiles:${Math.max(1,tiles.length)}">
+    ${quotes?`<div class="dz-row dz-quotes">${quotes}</div>`:''}
     ${tiles.length?`<div class="dz-row dz-tiles">${tiles.join('')}</div>`:''}
     <div class="dz-row dz-context">${curve}${dzSessionHTML(!curve)}</div></div>`;
 }
@@ -213,6 +224,11 @@ buildSpots=function(){
   for(const s of spots){
     if(s.k==='MARKETS'&&(S.spx||S.pnbk)){s.body=dzMarketsHTML();s.sub='';s.dur=20000;}
     if(s.k==='GREENWICH · 7-DAY'&&S.forecast.length)s.body=dzWeekHTML();
+  }
+  // Without stock quotes the upstream builder skips Markets; rates, the curve and bitcoin still earn the page.
+  if(!spots.some(s=>s.k==='MARKETS')&&wants('MARKETS')&&(S.btc||S.rates.sofr||S.rates.t10||S.curve)){
+    let at=spots.findIndex(s=>/FED WATCH/.test(s.k));
+    spots.splice(at<0?spots.length:at,0,{k:'MARKETS',acc:'var(--amber)',html:true,dur:20000,body:dzMarketsHTML(),sub:''});
   }
   const extra=[];
   if(wants('DAYLIGHT'))extra.push([{k:'DAYLIGHT',acc:'var(--amber)',html:true,dur:16000,body:dzDaylightHTML(),sub:''},/7-DAY|WEATHER TODAY/]);

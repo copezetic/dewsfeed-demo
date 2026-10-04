@@ -23,6 +23,16 @@ body{text-rendering:optimizeLegibility;font-feature-settings:"kern","liga"}
 svg text[font-family="Georgia"],svg text[font-family^="Georgia"]{font-family:var(--editorial)}
 #spot #spotKickerTxt{font-weight:500;letter-spacing:.04em}
 
+/* ── brand mark ── */
+#deskBrand{display:flex;align-items:center;gap:.5em}
+#deskMark{height:1.25em;width:1.25em;flex:0 0 auto;overflow:visible;color:var(--amber)}
+#deskMark .tower{fill:var(--ink)}#deskMark .band{fill:var(--ground);opacity:.55}#deskMark .lamp{fill:var(--amber)}
+#deskMark .rail{fill:none;stroke:var(--ink);stroke-width:1.4;stroke-linecap:round}
+#deskMark .beam{animation:dzBeam 7s ease-in-out infinite}#deskMark .beam.r{animation-delay:-3.5s}
+@keyframes dzBeam{0%,100%{opacity:.15}50%{opacity:1}}
+@media(prefers-reduced-motion:reduce){#deskMark .beam{animation:none;opacity:.7}}
+.dz-markets.noquotes{grid-template-rows:auto minmax(0,1fr)}
+
 /* ── one scrim for every painted scene, so text contrast is the same on all of them ── */
 #spot[data-scene=markets]::before{background:var(--scrim),url('desk-painted-markets.jpg') center/cover}
 #spot[data-scene=time]::before{background:var(--scrim),url('desk-painted-markets.jpg') center/cover}
