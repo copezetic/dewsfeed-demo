@@ -60,8 +60,19 @@ function dzMetaPaint(){
   el.innerHTML=[age,pos].filter(Boolean).join('<i>·</i>');
 }
 const dzShowOriginal=showSpot;
-showSpot=function(){dzShowOriginal();dzMetaPaint();};
-setInterval(dzMetaPaint,30000);
+let dzLastShow=performance.now(),dzLastDur=20000;
+showSpot=function(){
+  try{dzShowOriginal();}
+  catch(e){   // a page that fails to build must not freeze the wall: report it and move on
+    console.error('Dews Feed: page failed, skipping',deskState.current,e);
+    spotIdx=(spotIdx+1)%Math.max(1,spots.length);deskSchedule(8000);
+  }
+  dzLastShow=performance.now();dzLastDur=deskState.remaining||20000;try{dzMetaPaint();}catch(e){}
+};
+setInterval(()=>{try{dzMetaPaint();}catch(e){}},30000);
+// Watchdog: if a page has overstayed its slot by 45 s while the display is visible and not
+// paused, the rotation has stalled (a thrown error, a starved timer) — advance it.
+setInterval(()=>{if(deskState.paused||document.hidden)return;if(performance.now()-dzLastShow>dzLastDur+45000){console.warn('Dews Feed: rotation stalled, advancing');try{showSpot();}catch(e){}}},15000);
 
 /* ───────── charts ───────── */
 // Sparkline with a dashed reference at the first value, HI/LO in a right gutter,
@@ -220,6 +231,9 @@ newsPageHTML=(items,extra,wm)=>dzNewsOriginal(items,Math.max(extra,4),wm);   // 
 const dzBuildOriginal=buildSpots;
 buildSpots=function(){
   dzBuildOriginal();
+  try{dzAugment();}catch(e){console.warn('Dews Feed: design pages skipped',e);}   // never let a page builder stop the rotation
+};
+function dzAugment(){
   const group=deskState.group,all=group==='all'||group==='overview',wants=k=>all||deskGroups[group]?.test(k);
   for(const s of spots){
     if(s.k==='MARKETS'&&(S.spx||S.pnbk)){s.body=dzMarketsHTML();s.sub='';s.dur=20000;}
@@ -240,4 +254,4 @@ buildSpots=function(){
   }
   const menu=$('deskPages');
   for(const k of ['DAYLIGHT','ON THE HORIZON'])if(menu&&![...menu.options].some(o=>o.value===k))menu.insertAdjacentHTML('beforeend',`<option value="${k}">${k}</option>`);
-};
+}

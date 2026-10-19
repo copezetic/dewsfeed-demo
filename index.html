@@ -1226,9 +1226,9 @@
   #alertStrip.show{display:flex}
   #alertStrip .puls{animation:pulse 1.1s infinite}
 </style>
-<link rel="stylesheet" href="desk.css?v=20261003-design3">
+<link rel="stylesheet" href="desk.css?v=20261019-pi1">
 <link rel="preload" as="image" href="desk-greenwich-harbor.webp">
-<link rel="stylesheet" href="design.css?v=20261003-design3">
+<link rel="stylesheet" href="design.css?v=20261019-pi1">
 </head>
 <body>
 <!-- Ambient depth field: two parallax particle layers + volumetric orbs.
@@ -3189,10 +3189,12 @@ function buildSpots(){
     sub:"BUOYS AT REAL NOAA FLASH PERIODS · NDBC 44025"+(CFG.aisKey?" · VESSELS: AIS LIVE":"")});
 
   /* COMMUTE — OSRM typical drive times (Google Maps dropped: it was billing) */
-  if(S.traffic){
+  // S.traffic exists before its routes arrive (since the 09-21 fetchTraffic rewrite), so each
+  // route may be missing; a throw here would stop the whole rotation.
+  if(S.traffic&&(S.traffic.home||S.traffic.lake||S.traffic.woodside||S.traffic.shelton)){
     spots.push({k:"DRIVE TIMES FROM OFFICE",acc:"var(--yellow)",html:true,dur:16000,
       body:`<div class="intro intro-jeep"><span class="ijp">${VEH.jeep}${VEH.reticle}
-        <b class="tlm">ASSET WAGONEER · ETA HOME ${esc(S.traffic.home.toUpperCase())}</b></span></div>
+        <b class="tlm">ASSET WAGONEER · ETA HOME ${esc(String(S.traffic.home||"—").toUpperCase())}</b></span></div>
       <div class="cm-wrap">${[
         ["HOME",S.traffic.home,"STAMFORD","var(--amber)"],
         ["THE LAKE",S.traffic.lake,"WALLENPAUPACK","var(--teal)"],
@@ -3836,8 +3838,8 @@ async function fetchTasks(){
 
 </script>
 <script src="sports.js?v=20260921-sports1"></script>
-<script src="desk.js?v=20261003-design3"></script>
-<script src="design.js?v=20261003-design3"></script>
+<script src="desk.js?v=20261019-pi1"></script>
+<script src="design.js?v=20261019-pi1"></script>
 <script>
 /* ══════════════ BOOT ══════════════ */
 (async function boot(){

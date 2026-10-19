@@ -259,28 +259,67 @@ function deskLightPattern(l){
  on=on.map(([a,b])=>[a,Math.min(P,Math.max(b,a+.3))]);
  return {P,layers:[{colour:deskLightColour(cols[0]),on}]};
 }
-function deskLightKeyframes(name,P,on){
- const stops=new Map([[0,.06],[100,.06]]);const pct=t=>+(Math.max(0,Math.min(P,t))/P*100).toFixed(2);
- for(const [a,b] of on){if(a>0)stops.set(pct(a-.02),.06);stops.set(pct(a),1);stops.set(pct(b),1);if(b<P)stops.set(pct(b+.02),.06);}
- return '@keyframes '+name+'{'+[...stops].sort((x,y)=>x[0]-y[0]).map(([p,o])=>p+'%{opacity:'+o+'}').join('')+'}';
-}
 function deskLightLabel(l){const [,,,ch,grp,col,per,,rng]=l;const c=String(col||'white').split(';').map(x=>({white:'W',red:'R',green:'G',yellow:'Y',blue:'Bu'}[x]||x)).join('/');return ch+(grp>1?'('+grp+')':'')+' '+c+(per?' '+per+'s':'')+(rng?' · '+rng+' NM':'');}
+// The chart is drawn on a canvas at a low, fixed rate (10 fps, lower if a frame runs long)
+// instead of dozens of CSS animations: on the office Pi, 68 animated SVG groups starved the
+// page's timers and the rotation stalled. Coastline, labels and titles are drawn once; each
+// frame only paints the lights.
 function deskCoastalChart(){
- const v=seaboardViews.north;let css='',marks='',labels='',rotating=0;const placed=[];  // labels: brightest first (list is sorted by range), skip collisions
- DESK_LIGHTS.forEach((l,i)=>{
-  const [x,y]=deskCoastalXY(l[1],l[2]),p=deskLightPattern(l),name=esc(l[0]);
-  if(!p){const c=deskLightColour(String(l[5]).split(';')[0]);marks+='<g class="cl cl-fixed" fill="'+c+'"><title>'+name+' · '+esc(deskLightLabel(l))+'</title><circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="9" opacity=".12"/><circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="2.6" opacity=".85"/></g>';}
-  else if(/^(Fl|LFl|Al\.Fl)$/.test(l[3])&&(l[8]||0)>=9){
-   // Major flashing lights are drawn as a rotating optic: one beam per flash in the group,
-   // one turn per charted period, reach equal to the charted nominal range (1 nm = 1.84 units).
-   const X=x.toFixed(1),Y=y.toFixed(1),len=Math.max(20,(l[8]||10)*1.84),w=len*.15;rotating++;
-   const beams=p.layers.map(L=>{const gid='clBeam'+({'#ff7069':'R','#79e6a8':'G'}[L.colour]||'W');return L.on.map(([t0])=>'<polygon transform="rotate('+(t0/p.P*360).toFixed(1)+' '+X+' '+Y+')" points="'+X+','+Y+' '+(x-w).toFixed(1)+','+(y-len).toFixed(1)+' '+(x+w).toFixed(1)+','+(y-len).toFixed(1)+'" fill="url(#'+gid+')"/>').join('');}).join('');
-   marks+='<g class="cl cl-rot" fill="'+p.layers[0].colour+'"><title>'+name+' · '+esc(deskLightLabel(l))+'</title><g class="cl-spin" style="transform-origin:'+X+'px '+Y+'px;--per:'+p.P+'s;--delay:-'+((i*1.37)%p.P).toFixed(2)+'s">'+beams+'</g><circle cx="'+X+'" cy="'+Y+'" r="7" opacity=".16"/><circle cx="'+X+'" cy="'+Y+'" r="2.6"/></g>';
+ return '<div class="desk-coastal-native"><canvas class="cl-canvas" role="img" aria-label="New England coastal lights flashing at their charted rhythms"></canvas></div>';
+}
+let deskCoastalTimer=null;
+function deskCoastalStop(){clearTimeout(deskCoastalTimer);deskCoastalTimer=null;}
+function deskCoastalStart(canvas){
+ deskCoastalStop();if(!canvas)return;
+ const coast=new Path2D(seaboardViews.north.path),ctx=canvas.getContext('2d');
+ const mono=(getComputedStyle(document.body).getPropertyValue('--mono')||'monospace').trim(),serif=(getComputedStyle(document.body).getPropertyValue('--editorial')||'Georgia,serif').trim();
+ const lights=DESK_LIGHTS.map((l,i)=>{const [x,y]=deskCoastalXY(l[1],l[2]),p=deskLightPattern(l);return {l,x,y,p,rot:!!p&&/^(Fl|LFl|Al\.Fl)$/.test(l[3])&&(l[8]||0)>=9,phase:i*1.37,len:Math.max(20,(l[8]||10)*1.84),colour:deskLightColour(String(l[5]).split(';')[0])};});
+ const placed=[],labels=[];
+ for(const L of lights)if((L.l[8]||0)>=17&&!placed.some(([px,py])=>Math.abs(py-L.y)<13&&Math.abs(px-L.x)<150)){placed.push([L.x,L.y]);labels.push({x:L.x,y:L.y,right:L.l[2]>-70.2||L.l[1]<41.2,text:L.l[0].replace(/ Light$/,'').toUpperCase()});}
+ const rotating=lights.filter(L=>L.rot).length,reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const rgba=(hex,a)=>'rgba('+parseInt(hex.slice(1,3),16)+','+parseInt(hex.slice(3,5),16)+','+parseInt(hex.slice(5,7),16)+','+a.toFixed(3)+')';
+ let base=null,key='',dpr=1,s=1,ox=0,oy=0,period=100;
+ const fit=()=>{
+  const host=canvas.parentElement,W=host.clientWidth,H=host.clientHeight;if(!W||!H)return false;
+  dpr=Math.min(2,window.devicePixelRatio||1);const k=W+'x'+H+'@'+dpr;if(k===key)return true;key=k;
+  canvas.width=Math.round(W*dpr);canvas.height=Math.round(H*dpr);canvas.style.width=W+'px';canvas.style.height=H+'px';
+  s=Math.min(W/1000,H/540);ox=(W-1000*s)/2;oy=(H-540*s)/2;
+  base=document.createElement('canvas');base.width=canvas.width;base.height=canvas.height;
+  const b=base.getContext('2d');b.setTransform(dpr,0,0,dpr,0,0);b.fillStyle='#060e16';b.fillRect(0,0,W,H);
+  b.translate(ox,oy);b.scale(s,s);b.fillStyle='#131f22';b.fill(coast);b.strokeStyle='#4d665f';b.lineWidth=.6;b.stroke(coast);
+  const text=(str,x,y,font,fill,align,spacing)=>{b.font=font;b.fillStyle=fill;b.textAlign=align||'left';if('letterSpacing' in b)b.letterSpacing=(spacing||0)+'px';b.fillText(str,x,y);};
+  for(const t of labels)text(t.text,t.x+(t.right?9:-9),t.y+3.5,'9px '+mono,'#8fa39c',t.right?'left':'right',1.2);
+  text('COASTAL LIGHTS',24,34,'600 15px '+mono,'#eee6d6','left',4.8);
+  text('NEW ENGLAND AFTER DARK · '+lights.length+' CHARTED LIGHTS · '+rotating+' SWEEP ONCE PER CHARTED PERIOD · BEAM REACH = CHARTED RANGE',24,52,'8px '+mono,'#8fa39c','left',1.6);
+  text('ATLANTIC OCEAN',975,515,'18px '+serif,'#5c7673','right',5);
+  return true;
+ };
+ const dot=(x,y,r,fill)=>{ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=fill;ctx.fill();};
+ const beam=(x,y,a,len,colour)=>{const w=len*.15;ctx.save();ctx.translate(x,y);ctx.rotate(a);const g=ctx.createLinearGradient(0,0,0,-len);g.addColorStop(0,rgba(colour,.8));g.addColorStop(.45,rgba(colour,.3));g.addColorStop(1,rgba(colour,0));ctx.fillStyle=g;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(-w,-len);ctx.lineTo(w,-len);ctx.closePath();ctx.fill();ctx.restore();};
+ const frame=()=>{
+  deskCoastalTimer=null;if(!canvas.isConnected)return;
+  const started=performance.now(),t=started/1000;
+  if(fit()){
+   ctx.setTransform(1,0,0,1,0,0);ctx.drawImage(base,0,0);ctx.setTransform(dpr*s,0,0,dpr*s,dpr*ox,dpr*oy);
+   for(const L of lights){
+    if(!L.p){dot(L.x,L.y,9,rgba(L.colour,.12));dot(L.x,L.y,2.6,rgba(L.colour,.85));continue;}
+    const tt=(t+L.phase)%L.p.P;
+    if(L.rot){
+     const a0=tt/L.p.P*Math.PI*2;
+     for(const layer of L.p.layers)for(const [t0] of layer.on)beam(L.x,L.y,a0+t0/L.p.P*Math.PI*2,L.len,layer.colour);
+     dot(L.x,L.y,7,rgba(L.colour,.16));dot(L.x,L.y,2.6,rgba(L.colour,1));
+    }else{
+     let on=.06,col=L.colour;
+     for(const layer of L.p.layers)if(layer.on.some(([a,b])=>tt>=a&&tt<=b)){on=1;col=layer.colour;}
+     dot(L.x,L.y,14,rgba(col,.14*on));dot(L.x,L.y,5,rgba(col,.55*on));dot(L.x,L.y,2.4,rgba(col,on));
+    }
+   }
   }
-  else{marks+='<g class="cl"><title>'+name+' · '+esc(deskLightLabel(l))+'</title>'+p.layers.map((L,k)=>{const id='cl'+i+'_'+k;css+=deskLightKeyframes(id,p.P,L.on)+'#spotBody .desk-coastal-native .'+id+'{animation:'+id+' '+p.P+'s linear infinite!important}';return '<g class="'+id+'" fill="'+L.colour+'"><circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="14" opacity=".14"/><circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="5" opacity=".55"/><circle cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="2.4"/></g>';}).join('')+'</g>';}
-  if((l[8]||0)>=17&&!placed.some(([px,py])=>Math.abs(py-y)<13&&Math.abs(px-x)<150)){placed.push([x,y]);const right=l[2]>-70.2||l[1]<41.2;labels+='<text x="'+(x+(right?9:-9)).toFixed(1)+'" y="'+(y+3.5).toFixed(1)+'" text-anchor="'+(right?'start':'end')+'">'+esc(l[0].replace(/ Light$/,'').toUpperCase())+'</text>';}
- });
- return '<div class="desk-coastal-native"><style>'+css+'</style><svg viewBox="0 0 1000 540" preserveAspectRatio="xMidYMid meet" role="img" aria-label="New England coastal lights flashing at their charted rhythms"><defs>'+[['W','#fff1c4'],['R','#ff7069'],['G','#79e6a8']].map(([k,c])=>'<linearGradient id="clBeam'+k+'" x1=".5" y1="1" x2=".5" y2="0"><stop offset="0" stop-color="'+c+'" stop-opacity=".8"/><stop offset=".45" stop-color="'+c+'" stop-opacity=".3"/><stop offset="1" stop-color="'+c+'" stop-opacity="0"/></linearGradient>').join('')+'</defs><rect width="1000" height="540" fill="#060e16"/><path d="'+v.path+'" fill="#131f22" stroke="#4d665f" stroke-width=".6"/>'+marks+'<g class="cl-labels">'+labels+'</g><text class="cl-kicker" x="24" y="34">COASTAL LIGHTS</text><text class="cl-kicker-sub" x="24" y="52">NEW ENGLAND AFTER DARK · '+DESK_LIGHTS.length+' CHARTED LIGHTS · '+rotating+' SWEEP ONCE PER CHARTED PERIOD · BEAM REACH = CHARTED RANGE</text><text class="cl-ocean" x="975" y="515" text-anchor="end">ATLANTIC OCEAN</text></svg></div>';
+  if(reduced)return;                                   // one still frame
+  const cost=performance.now()-started;period=cost>40?Math.min(500,period*1.5):Math.max(100,period*.9);   // back off on a slow machine
+  deskCoastalTimer=setTimeout(()=>requestAnimationFrame(frame),period);
+ };
+ frame();
 }
 function deskCoastalHTML(){
  const tide=S.tides?esc(S.tides):'Awaiting tide update';
@@ -306,7 +345,7 @@ function deskCoastalLive(){
 }
 function deskCoastalMount(){
  const host=$('deskCoastalMap');if(!host)return;
- clearInterval(deskCoastalFeatureTimer);
+ clearInterval(deskCoastalFeatureTimer);deskCoastalStart(host.querySelector('canvas'));
  let n=Math.floor(Math.random()*DESK_LIGHTS.length);
  const feature=()=>{const el=$('deskCoastalFeature');if(!el){clearInterval(deskCoastalFeatureTimer);return;}const l=DESK_LIGHTS[n%DESK_LIGHTS.length];n++;el.innerHTML='<strong>NOW SHOWING</strong><b>'+esc(l[0])+'</b><span>'+esc(deskLightLabel(l))+'</span>';};
  feature();deskCoastalFeatureTimer=setInterval(feature,9000);
